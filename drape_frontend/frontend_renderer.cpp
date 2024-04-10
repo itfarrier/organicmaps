@@ -1997,7 +1997,7 @@ void FrontendRenderer::OnTap(m2::PointD const & pt, bool isLongTap)
 
   ASSERT(m_tapEventInfoHandler != nullptr, ());
   auto [featureId, markId] = GetVisiblePOI(selectRect);
-  m_tapEventInfoHandler({mercator, !isLongTap, isMyPosition, featureId, markId});
+  m_tapEventInfoHandler({mercator, isLongTap, isMyPosition, featureId, markId});
 }
 
 void FrontendRenderer::OnForceTap(m2::PointD const & pt)
