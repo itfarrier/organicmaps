@@ -61,14 +61,16 @@ final class DefaultLocalDirectoryMonitor: LocalDirectoryMonitor {
     guard case .stopped = state else { return }
 
     if let source {
-      resume()
       state = .started(dirSource: source)
+      resume()
+      completion?(.success)
       return
     }
 
     let nowTimer = Timer.scheduledTimer(withTimeInterval: .zero, repeats: false) { [weak self] _ in
       self?.debounceTimerDidFire()
     }
+    
     do {
       let directorySource = try DefaultLocalDirectoryMonitor.source(for: directory)
       directorySource.setEventHandler { [weak self] in
@@ -153,6 +155,7 @@ final class DefaultLocalDirectoryMonitor: LocalDirectoryMonitor {
   }
 
   private func debounceTimerDidFire() {
+    guard !isPaused else { return }
     guard case .debounce(let dirSource, let timer) = state else { fatalError() }
     timer.invalidate()
     state = .started(dirSource: dirSource)
