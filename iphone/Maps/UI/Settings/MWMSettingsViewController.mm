@@ -218,43 +218,57 @@ static NSString * const kUDDidShowICloudSynchronizationEnablingAlert = @"kUDDidS
   [self.drivingOptionsCell configWithTitle:L(@"driving_options_title") info:@""];
 }
 
-- (void)showICloudSynchronizationEnablingAlert {
-  // TODO: add localized string
-  UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Enable iCloud Syncronization"
-                                                                           message:@"Please note that iCloud synchronization is currently in Beta. \nFor safety, back up your bookmarks before enabling."
+- (void)showICloudSynchronizationEnablingAlert:(void (^)(BOOL))isEnabled {
+  UIAlertController * alertController = [UIAlertController alertControllerWithTitle:L(@"enable_icloud_synchronization_title")
+                                                                           message:L(@"enable_icloud_synchronization_message")
                                                                     preferredStyle:UIAlertControllerStyleAlert];
-  UIAlertAction *okButton = [UIAlertAction actionWithTitle:@"OK"
+  UIAlertAction * enableButton = [UIAlertAction actionWithTitle:L(@"enable")
                                                      style:UIAlertActionStyleDefault
-                                                   handler:^(UIAlertAction *action) {
-    if ([MWMBookmarksManager.sharedManager isEmpty]) {
-      [NSUserDefaults.standardUserDefaults setBool:YES forKey:kUDDidShowICloudSynchronizationEnablingAlert];
-    } else {
-      [MWMBookmarksManager.sharedManager shareAllCategoriesWithCompletion:^(MWMBookmarksShareStatus status, NSURL * _Nonnull url) {
-        if (status == MWMBookmarksShareStatusSuccess) {
+                                                   handler:^(UIAlertAction * action) {
+    [self setICloudSynchronizationEnablingAlertIsShown];
+    isEnabled(YES);
+  }];
+  UIAlertAction * backupButton = [UIAlertAction actionWithTitle:L(@"backup")
+                                                         style:UIAlertActionStyleDefault
+                                                       handler:^(UIAlertAction * action) {
+    [MWMBookmarksManager.sharedManager shareAllCategoriesWithCompletion:^(MWMBookmarksShareStatus status, NSURL * _Nonnull url) {
+      switch (status) {
+        case MWMBookmarksShareStatusSuccess: {
           MWMActivityViewController * shareController = [MWMActivityViewController shareControllerForURL:url message:L(@"share_bookmarks_email_body") completionHandler:^(UIActivityType  _Nullable activityType, BOOL completed, NSArray * _Nullable returnedItems, NSError * _Nullable activityError) {
-            [NSUserDefaults.standardUserDefaults setBool:YES forKey:kUDDidShowICloudSynchronizationEnablingAlert];
+            [self setICloudSynchronizationEnablingAlertIsShown];
+            isEnabled(completed);
           }];
           [self presentViewController:shareController animated:YES completion:nil];
-        } else if (status == MWMBookmarksShareStatusEmptyCategory) {
-          [[MWMToast toastWithText:L(@"bookmarks_error_title_share_empty")] show];
-        } else if (status == MWMBookmarksShareStatusFileError) {
-          [[MWMToast toastWithText:L(@"dialog_routing_system_error")] show];
+          break;
         }
-      }];
-    }
+        case MWMBookmarksShareStatusEmptyCategory:
+          [[MWMToast toastWithText:L(@"bookmarks_error_title_share_empty")] show];
+          isEnabled(NO);
+          break;
+        case MWMBookmarksShareStatusArchiveError:
+        case MWMBookmarksShareStatusFileError:
+          [[MWMToast toastWithText:L(@"dialog_routing_system_error")] show];
+          isEnabled(NO);
+          break;
+      }
+    }];
   }];
-  UIAlertAction *cancelButton = [UIAlertAction actionWithTitle:L(@"cancel")
+  UIAlertAction * cancelButton = [UIAlertAction actionWithTitle:L(@"cancel")
                                                          style:UIAlertActionStyleCancel
-                                                       handler:^(UIAlertAction *action) {
-    self.iCloudSynchronizationCell.isOn = false;
+                                                       handler:^(UIAlertAction * action) {
+    isEnabled(NO);
   }];
 
-  [alertController addAction:okButton];
   [alertController addAction:cancelButton];
-
+  if (![MWMBookmarksManager.sharedManager isEmpty])
+    [alertController addAction:backupButton];
+  [alertController addAction:enableButton];
   [self presentViewController:alertController animated:YES completion:nil];
 }
 
+- (void)setICloudSynchronizationEnablingAlertIsShown {
+  [NSUserDefaults.standardUserDefaults setBool:YES forKey:kUDDidShowICloudSynchronizationEnablingAlert];
+}
 
 #pragma mark - SettingsTableViewSwitchCellDelegate
 
@@ -289,8 +303,10 @@ static NSString * const kUDDidShowICloudSynchronizationEnablingAlert = @"kUDDidS
     f.SaveAutoZoom(value);
   } else if (cell == self.iCloudSynchronizationCell) {
     if (![NSUserDefaults.standardUserDefaults boolForKey:kUDDidShowICloudSynchronizationEnablingAlert]) {
-      self.iCloudSynchronizationCell.isOn = false;
-      [self showICloudSynchronizationEnablingAlert];
+      [self showICloudSynchronizationEnablingAlert:^(BOOL isEnabled) {
+        [self.iCloudSynchronizationCell setOn:isEnabled animated:YES];
+        [MWMSettings setICLoudSynchronizationEnabled:isEnabled];
+      }];
     } else {
       [MWMSettings setICLoudSynchronizationEnabled:value];
     }
