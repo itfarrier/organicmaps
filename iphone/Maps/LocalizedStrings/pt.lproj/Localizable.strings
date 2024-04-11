@@ -1270,6 +1270,18 @@
 /* Main screen title "Map" displayed in the navigation back button's menu. */
 "map" = "Mapa";
 
+/* Title for the "Enable iCloud Syncronization" alert. */
+"enable_icloud_synchronization_title" = "Ativar a sincronização do iCloud";
+
+/* Message for the "Enable iCloud Syncronization" alert. */
+"enable_icloud_synchronization_message" = "A sincronização com o iCloud é uma funcionalidade experimental em desenvolvimento. Certifica-te de que fizeste uma cópia de segurança de todos os teus marcadores e faixas.";
+
+/* Title for the "Enable iCloud Syncronization" alert's "Enable" action button. */
+"enable" = "Ativar";
+
+/* Title for the "Enable iCloud Syncronization" alert's "Backup" action button. */
+"backup" = "Cópia de segurança";
+
 
 /********** Types **********/
 
