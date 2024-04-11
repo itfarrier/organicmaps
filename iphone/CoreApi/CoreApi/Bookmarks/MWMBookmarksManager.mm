@@ -577,27 +577,11 @@ typedef void (^SharingResultCompletionHandler)(MWMBookmarksShareStatus, NSURL *)
 }
 
 - (void)handleSharingResult:(BookmarkManager::SharingResult)sharingResult {
-  MWMBookmarksShareStatus status;
-  switch (sharingResult.m_code) {
-    case BookmarkManager::SharingResult::Code::Success:
-      self.shareCategoryURL = [NSURL fileURLWithPath:@(sharingResult.m_sharingPath.c_str()) isDirectory:NO];
-      ASSERT(self.shareCategoryURL, ("Invalid share category url"));
-      status = MWMBookmarksShareStatusSuccess;
-      break;
-    case BookmarkManager::SharingResult::Code::EmptyCategory:
-      status = MWMBookmarksShareStatusEmptyCategory;
-      break;
-    case BookmarkManager::SharingResult::Code::ArchiveError:
-      status = MWMBookmarksShareStatusArchiveError;
-      break;
-    case BookmarkManager::SharingResult::Code::FileError:
-      status = MWMBookmarksShareStatusFileError;
-      break;
-  }
-
-  [self loopObservers:^(id<MWMBookmarksObserver> observer) {
-    if ([observer respondsToSelector:@selector(onBookmarksCategoryFilePrepared:)])
-      [observer onBookmarksCategoryFilePrepared:status];
+  [self handleSharingResult:sharingResult completion:^(MWMBookmarksShareStatus status, NSURL *url) {
+    [self loopObservers:^(id<MWMBookmarksObserver> observer) {
+      if ([observer respondsToSelector:@selector(onBookmarksCategoryFilePrepared:)])
+        [observer onBookmarksCategoryFilePrepared:status];
+    }];
   }];
 }
 
@@ -613,6 +597,7 @@ typedef void (^SharingResultCompletionHandler)(MWMBookmarksShareStatus, NSURL *)
   switch (sharingResult.m_code) {
     case BookmarkManager::SharingResult::Code::Success:
       url = [NSURL fileURLWithPath:@(sharingResult.m_sharingPath.c_str()) isDirectory:NO];
+      self.shareCategoryURL = url;
       ASSERT(url, ("Invalid share category URL"));
       status = MWMBookmarksShareStatusSuccess;
       break;
