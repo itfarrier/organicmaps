@@ -564,34 +564,26 @@ typedef void (^SharingResultCompletionHandler)(MWMBookmarksShareStatus, NSURL *)
 
 #pragma mark - Category sharing
 
-- (void)shareCategory:(MWMMarkGroupID)groupId
-{
-  self.bm.PrepareFileForSharing({groupId}, [self](auto sharingResult)
-  {
+- (void)shareCategory:(MWMMarkGroupID)groupId {
+  self.bm.PrepareFileForSharing({groupId}, [self](auto sharingResult) {
     [self handleSharingResult:sharingResult];
   });
 }
 
-- (void)shareAllCategories
-{
-  self.bm.PrepareAllFilesForSharing([self](auto sharingResult)
-  {
+- (void)shareAllCategories {
+  self.bm.PrepareAllFilesForSharing([self](auto sharingResult) {
     [self handleSharingResult:sharingResult];
   });
 }
 
-- (void)handleSharingResult:(BookmarkManager::SharingResult)sharingResult
-{
+- (void)handleSharingResult:(BookmarkManager::SharingResult)sharingResult {
   MWMBookmarksShareStatus status;
-  switch (sharingResult.m_code)
-  {
+  switch (sharingResult.m_code) {
     case BookmarkManager::SharingResult::Code::Success:
-    {
       self.shareCategoryURL = [NSURL fileURLWithPath:@(sharingResult.m_sharingPath.c_str()) isDirectory:NO];
       ASSERT(self.shareCategoryURL, ("Invalid share category url"));
       status = MWMBookmarksShareStatusSuccess;
       break;
-    }
     case BookmarkManager::SharingResult::Code::EmptyCategory:
       status = MWMBookmarksShareStatusEmptyCategory;
       break;
