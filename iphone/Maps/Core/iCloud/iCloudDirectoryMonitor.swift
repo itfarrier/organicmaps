@@ -1,6 +1,7 @@
 protocol UbiquitousDirectoryMonitor: DirectoryMonitor {
   var delegate: UbiquitousDirectoryMonitorDelegate? { get set }
   func fetchUbiquityDirectoryUrl(completion: ((Result<URL, SynchronizationError>) -> Void)?)
+  func isCloudAvailable() -> Bool
 }
 
 protocol UbiquitousDirectoryMonitorDelegate : AnyObject {
@@ -23,18 +24,20 @@ final class iCloudDirectoryMonitor: NSObject, UbiquitousDirectoryMonitor {
     return identifier
   }()
 
-  static let `default` = iCloudDirectoryMonitor(cloudContainerIdentifier: iCloudDirectoryMonitor.sharedContainerIdentifier)
+  static let `default` = iCloudDirectoryMonitor(fileManager: FileManager.default, cloudContainerIdentifier: iCloudDirectoryMonitor.sharedContainerIdentifier)
 
-  private var metadataQuery: NSMetadataQuery?
-  private var containerIdentifier: String
-  private var ubiquitousDocumentsDirectory: URL?
+  let containerIdentifier: String
+  let fileManager: FileManager
+  private(set) var metadataQuery: NSMetadataQuery?
+  private(set) var ubiquitousDocumentsDirectory: URL?
 
   // MARK: - Public properties
   var isStarted: Bool { return metadataQuery?.isStarted ?? false }
   private(set) var isPaused: Bool = true
   weak var delegate: UbiquitousDirectoryMonitorDelegate?
 
-  init(cloudContainerIdentifier: String = iCloudDirectoryMonitor.sharedContainerIdentifier) {
+  init(fileManager: FileManager, cloudContainerIdentifier: String) {
+    self.fileManager = fileManager
     self.containerIdentifier = cloudContainerIdentifier
     super.init()
 
@@ -46,7 +49,7 @@ final class iCloudDirectoryMonitor: NSObject, UbiquitousDirectoryMonitor {
 
   // MARK: - Public methods
   func start(completion: VoidResultCompletionHandler? = nil) {
-    guard cloudIsAvailable() else {
+    guard isCloudAvailable() else {
       completion?(.failure(SynchronizationError.iCloudIsNotAvailable))
       return
     }
@@ -82,7 +85,7 @@ final class iCloudDirectoryMonitor: NSObject, UbiquitousDirectoryMonitor {
       return
     }
     DispatchQueue.global().async {
-      guard let containerUrl = FileManager.default.url(forUbiquityContainerIdentifier: self.containerIdentifier) else {
+      guard let containerUrl = self.fileManager.url(forUbiquityContainerIdentifier: self.containerIdentifier) else {
         LOG(.error, "Failed to retrieve container's URL for:\(self.containerIdentifier)")
         completion?(.failure(.containerNotFound))
         return
@@ -92,12 +95,9 @@ final class iCloudDirectoryMonitor: NSObject, UbiquitousDirectoryMonitor {
       completion?(.success(documentsContainerUrl))
     }
   }
-}
-
-// MARK: - Private
-private extension iCloudDirectoryMonitor {
-  func cloudIsAvailable() -> Bool {
-    let cloudToken = FileManager.default.ubiquityIdentityToken
+  
+  func isCloudAvailable() -> Bool {
+    let cloudToken = fileManager.ubiquityIdentityToken
     guard let cloudToken else {
       UserDefaults.standard.removeObject(forKey: kUDCloudIdentityKey)
       LOG(.debug, "Cloud is not available. Cloud token is nil.")
@@ -113,6 +113,10 @@ private extension iCloudDirectoryMonitor {
       return false
     }
   }
+}
+
+// MARK: - Private
+private extension iCloudDirectoryMonitor {
 
   func subscribeToCloudAvailabilityNotifications() {
     NotificationCenter.default.addObserver(self, selector: #selector(cloudAvailabilityChanged(_:)), name: .NSUbiquityIdentityDidChange, object: nil)
@@ -120,8 +124,8 @@ private extension iCloudDirectoryMonitor {
 
   // TODO: - Actually this notification was never called. If user disable the iCloud for the current app during the active state the app will be relaunched. Needs to investigate additional cases when this notification can be sent.
   @objc func cloudAvailabilityChanged(_ notification: Notification) {
-    LOG(.debug, "Cloud availability changed to : \(cloudIsAvailable())")
-    cloudIsAvailable() ? startQuery() : stopQuery()
+    LOG(.debug, "Cloud availability changed to : \(isCloudAvailable())")
+    isCloudAvailable() ? startQuery() : stopQuery()
   }
 
   // MARK: - MetadataQuery
@@ -153,7 +157,7 @@ private extension iCloudDirectoryMonitor {
   }
 
   @objc func queryDidFinishGathering(_ notification: Notification) {
-    guard cloudIsAvailable(), let metadataQuery, notification.object as? NSMetadataQuery === metadataQuery, let metadataItems = metadataQuery.results as? [NSMetadataItem] else { return }
+    guard isCloudAvailable(), let metadataQuery, notification.object as? NSMetadataQuery === metadataQuery, let metadataItems = metadataQuery.results as? [NSMetadataItem] else { return }
     pause()
     let newContent = getContents(metadataItems)
     delegate?.didFinishGathering(contents: newContent)
@@ -161,7 +165,7 @@ private extension iCloudDirectoryMonitor {
   }
 
   @objc func queryDidUpdate(_ notification: Notification) {
-    guard cloudIsAvailable(), let metadataQuery, notification.object as? NSMetadataQuery === metadataQuery, let metadataItems = metadataQuery.results as? [NSMetadataItem] else { return }
+    guard isCloudAvailable(), let metadataQuery, notification.object as? NSMetadataQuery === metadataQuery, let metadataItems = metadataQuery.results as? [NSMetadataItem] else { return }
     pause()
     let newContent = getContents(metadataItems, userInfo: notification.userInfo)
     delegate?.didUpdate(contents: newContent)
@@ -211,7 +215,7 @@ private extension iCloudDirectoryMonitor {
     }
     // On iOS we can get the list of deleted items from the .Trash directory but only when iCloud is enabled.
     guard let trashDirectoryUrl = ubiquitousDocumentsDirectory?.appendingPathComponent(kTrashDirectoryName),
-          let removedItems = try? FileManager.default.contentsOfDirectory(at: trashDirectoryUrl,
+          let removedItems = try? fileManager.contentsOfDirectory(at: trashDirectoryUrl,
                                                                           includingPropertiesForKeys: [.isDirectoryKey],
                                                                           options: [.skipsPackageDescendants, .skipsSubdirectoryDescendants]) else {
       return []
