@@ -84,6 +84,8 @@ static BookmarkManager::SortingType convertSortingTypeToCore(MWMBookmarksSorting
   }
 }
 
+typedef void (^SharingResultCompletionHandler)(MWMBookmarksShareStatus, NSURL *);
+
 @interface MWMBookmarksManager ()
 
 @property(nonatomic, readonly) BookmarkManager & bm;
@@ -607,34 +609,32 @@ static BookmarkManager::SortingType convertSortingTypeToCore(MWMBookmarksSorting
   }];
 }
 
-- (void)shareAllCategoriesWithCompletion:(void (^)(MWMBookmarksShareStatus, NSURL *))completion {
+- (void)shareAllCategoriesWithCompletion:(SharingResultCompletionHandler)completion {
   self.bm.PrepareAllFilesForSharing([self, completion](BookmarkManager::SharingResult sharingResult) {
-    MWMBookmarksShareStatus status = [self convertSharingResultToStatus:sharingResult];
-    NSURL *url = nil;
-    if (status == MWMBookmarksShareStatusSuccess) {
-      url = [NSURL fileURLWithPath:@(sharingResult.m_sharingPath.c_str()) isDirectory:NO];
-      ASSERT(url, ("Invalid share category URL"));
-    }
-
-    if (completion) {
-      dispatch_async(dispatch_get_main_queue(), ^{
-        completion(status, url);
-      });
-    }
+    [self handleSharingResult:sharingResult completion:completion];
   });
 }
 
-- (MWMBookmarksShareStatus)convertSharingResultToStatus:(BookmarkManager::SharingResult)sharingResult {
+- (void)handleSharingResult:(BookmarkManager::SharingResult)sharingResult completion:(SharingResultCompletionHandler)completion  {
+  NSURL *url = nil;
+  MWMBookmarksShareStatus status;
   switch (sharingResult.m_code) {
     case BookmarkManager::SharingResult::Code::Success:
-      return MWMBookmarksShareStatusSuccess;
+      url = [NSURL fileURLWithPath:@(sharingResult.m_sharingPath.c_str()) isDirectory:NO];
+      ASSERT(url, ("Invalid share category URL"));
+      status = MWMBookmarksShareStatusSuccess;
+      break;
     case BookmarkManager::SharingResult::Code::EmptyCategory:
-      return MWMBookmarksShareStatusEmptyCategory;
+      status = MWMBookmarksShareStatusEmptyCategory;
+      break;
     case BookmarkManager::SharingResult::Code::ArchiveError:
-      return MWMBookmarksShareStatusArchiveError;
+      status = MWMBookmarksShareStatusArchiveError;
+      break;
     case BookmarkManager::SharingResult::Code::FileError:
-      return MWMBookmarksShareStatusFileError;
+      status = MWMBookmarksShareStatusFileError;
+      break;
   }
+  completion(status, url);
 }
 
 
