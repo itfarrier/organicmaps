@@ -24,6 +24,11 @@ final class SettingsTableViewSwitchCell: MWMTableViewCell {
     set { switchButton.isOn = newValue }
   }
 
+  @objc
+  func setOn(_ isOn: Bool, animated: Bool) {
+    switchButton.setOn(isOn, animated: animated)
+  }
+
   override func awakeFromNib() {
     super.awakeFromNib()
     setupCell()
