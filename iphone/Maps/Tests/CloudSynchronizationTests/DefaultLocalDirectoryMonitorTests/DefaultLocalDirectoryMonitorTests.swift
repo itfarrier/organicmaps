@@ -6,13 +6,13 @@ final class DefaultLocalDirectoryMonitorTests: XCTestCase {
   let fileManager = FileManager.default
   let tempDirectory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
   var directoryMonitor: DefaultLocalDirectoryMonitor!
-  var mockDelegate: MockLocalDirectoryMonitorDelegate!
+  var mockDelegate: LocalDirectoryMonitorDelegateMock!
 
   override func setUp() {
     super.setUp()
     // Setup with a temporary directory and a mock delegate
     directoryMonitor = DefaultLocalDirectoryMonitor(fileManager: fileManager, directory: tempDirectory, fileType: .kml)
-    mockDelegate = MockLocalDirectoryMonitorDelegate()
+    mockDelegate = LocalDirectoryMonitorDelegateMock()
     directoryMonitor.delegate = mockDelegate
   }
 
@@ -94,7 +94,7 @@ final class DefaultLocalDirectoryMonitorTests: XCTestCase {
     let fileURL = tempDirectory.appendingPathComponent("test.kml")
     self.fileManager.createFile(atPath: fileURL.path, contents: Data(), attributes: nil)
 
-    wait(for: [startExpectation, didFinishGatheringExpectation, didUpdateExpectation], timeout: 120.0)
+    wait(for: [startExpectation, didFinishGatheringExpectation, didUpdateExpectation], timeout: 10)
     XCTAssertTrue(directoryMonitor.contents.contains { $0.fileUrl == fileURL }, "Contents should contain the newly added file.")
   }
 }

@@ -3,60 +3,17 @@ import XCTest
 
 typealias UbiquityIdentityToken = NSCoding & NSCopying & NSObjectProtocol
 
-class MockFileManager: FileManager {
-
-  var mockUbiquityIdentityToken: UbiquityIdentityToken?
-  var shouldReturnContainerURL: Bool = true
-
-  override var ubiquityIdentityToken: (any UbiquityIdentityToken)? {
-    return mockUbiquityIdentityToken
-  }
-
-  override func url(forUbiquityContainerIdentifier identifier: String?) -> URL? {
-    return shouldReturnContainerURL ? URL(fileURLWithPath: NSTemporaryDirectory()) : nil
-  }
-}
-
-class MockUbiquitousDirectoryMonitorDelegate: UbiquitousDirectoryMonitorDelegate {
-  var didFinishGatheringCalled = false
-  var didUpdateCalled = false
-  var didReceiveErrorCalled = false
-
-  var didFinishGatheringExpectation: XCTestExpectation?
-  var didUpdateExpectation: XCTestExpectation?
-  var didReceiveErrorExpectation: XCTestExpectation?
-
-  var contents = CloudContents()
-
-  func didFinishGathering(contents: CloudContents) {
-    didFinishGatheringCalled = true
-    didFinishGatheringExpectation?.fulfill()
-    self.contents = contents
-  }
-
-  func didUpdate(contents: CloudContents) {
-    didUpdateCalled = true
-    didUpdateExpectation?.fulfill()
-    self.contents = contents
-  }
-
-  func didReceiveCloudMonitorError(_ error: Error) {
-    didReceiveErrorCalled = true
-    didReceiveErrorExpectation?.fulfill()
-  }
-}
-
 class iCloudDirectoryMonitorTests: XCTestCase {
 
   var cloudMonitor: iCloudDirectoryMonitor!
-  var mockFileManager: MockFileManager!
-  var mockDelegate: MockUbiquitousDirectoryMonitorDelegate!
+  var mockFileManager: FileManagerMock!
+  var mockDelegate: UbiquitousDirectoryMonitorDelegateMock!
   var cloudContainerIdentifier: String = "iCloud.app.organicmaps.debug"
 
   override func setUp() {
     super.setUp()
-    mockFileManager = MockFileManager()
-    mockDelegate = MockUbiquitousDirectoryMonitorDelegate()
+    mockFileManager = FileManagerMock()
+    mockDelegate = UbiquitousDirectoryMonitorDelegateMock()
     cloudMonitor = iCloudDirectoryMonitor(fileManager: mockFileManager, cloudContainerIdentifier: cloudContainerIdentifier, fileType: .kml)
     cloudMonitor.delegate = mockDelegate
   }

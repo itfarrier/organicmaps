@@ -1,7 +1,7 @@
 import XCTest
 @testable import Organic_Maps__Debug_
 
-class MockLocalDirectoryMonitorDelegate: LocalDirectoryMonitorDelegate {
+class LocalDirectoryMonitorDelegateMock: LocalDirectoryMonitorDelegate {
   var didFinishGatheringExpectation: XCTestExpectation?
   var didUpdateExpectation: XCTestExpectation?
   var didReceiveErrorExpectation: XCTestExpectation?
