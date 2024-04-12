@@ -34,6 +34,7 @@ final class DefaultLocalDirectoryMonitor: LocalDirectoryMonitor {
   private let resourceKeys: [URLResourceKey] = [.nameKey, .typeIdentifierKey]
   private var source: DispatchSourceFileSystemObject?
   private var state: State = .stopped
+  private var didFinishGatheringIsCalled = false
   private(set) var contents = LocalContents()
 
   // MARK: - Public properties
@@ -81,6 +82,7 @@ final class DefaultLocalDirectoryMonitor: LocalDirectoryMonitor {
     pause()
     state = .stopped
     contents.removeAll()
+    didFinishGatheringIsCalled = false
   }
 
   func pause() {
@@ -165,7 +167,8 @@ final class DefaultLocalDirectoryMonitor: LocalDirectoryMonitor {
       }
     })
 
-    if contents.isEmpty {
+    if contents.isEmpty && !didFinishGatheringIsCalled {
+      didFinishGatheringIsCalled = true
       delegate?.didFinishGathering(contents: newContentMetadataItems)
     } else {
       delegate?.didUpdate(contents: newContentMetadataItems)
