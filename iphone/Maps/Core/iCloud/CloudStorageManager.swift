@@ -7,6 +7,7 @@ typealias VoidResultCompletionHandler = (VoidResult) -> Void
 
 let kTrashDirectoryName = ".Trash"
 let kUDDidFinishInitialCloudSynchronization = "kUDDidFinishInitialCloudSynchronization"
+let kICloudSynchronizationDidChangeEnabledStateNotificationName = "iCloudSynchronizationDidChangeEnabledStateNotification"
 
 @objc @objcMembers final class CloudStorageManger: NSObject {
 
@@ -22,12 +23,16 @@ let kUDDidFinishInitialCloudSynchronization = "kUDDidFinishInitialCloudSynchroni
   private var needsToReloadBookmarksOnTheMap = false
   private var semaphore: DispatchSemaphore?
 
+  static private var isInitialSynchronization: Bool {
+    return !UserDefaults.standard.bool(forKey: kUDDidFinishInitialCloudSynchronization)
+  }
+
   static let shared = CloudStorageManger()
 
   // MARK: - Initialization
   init(cloudDirectoryMonitor: iCloudDirectoryMonitor = iCloudDirectoryMonitor.default,
        localDirectoryMonitor: DefaultLocalDirectoryMonitor = DefaultLocalDirectoryMonitor.default,
-       synchronizationStateManager: SynchronizationStateManager = DefaultSynchronizationStateManager(isInitialSynchronization: !UserDefaults.standard.bool(forKey: kUDDidFinishInitialCloudSynchronization))) {
+       synchronizationStateManager: SynchronizationStateManager = DefaultSynchronizationStateManager(isInitialSynchronization: isInitialSynchronization)) {
     self.cloudDirectoryMonitor = cloudDirectoryMonitor
     self.localDirectoryMonitor = localDirectoryMonitor
     self.synchronizationStateManager = synchronizationStateManager
@@ -125,7 +130,7 @@ private extension CloudStorageManger {
     cloudDirectoryMonitor.resume()
   }
 
-  // MARK: - Setup BookmarksManager observing
+  // MARK: - BookmarksManager observing
   func addToBookmarksManagerObserverList() {
     bookmarksManager.add(self)
   }
@@ -173,8 +178,8 @@ extension CloudStorageManger: UbiquitousDirectoryMonitorDelegate {
   }
 }
 
-// MARK: - Handle Events and Errors
 private extension CloudStorageManger {
+  // MARK: - Handle Events
   func processEvents(_ events: [OutgoingEvent]) {
     events.forEach { [weak self] event in
       guard let self else { return }
@@ -214,29 +219,6 @@ private extension CloudStorageManger {
       processError(error)
     case .success:
       break
-    }
-  }
-
-  func processError(_ error: Error) {
-    DispatchQueue.main.async {
-      LOG(.error, "Synchronization error: \(error)")
-      if let synchronizationError = error as? SynchronizationError {
-        switch synchronizationError {
-        case .fileUnavailable:
-          // TODO: Handle file unavailable error
-          break
-        case .fileNotUploadedDueToQuota, .iCloudIsNotAvailable, .containerNotFound:
-          self.stopSynchronization()
-          // TODO: should we try to restart sync earlier? Or use some timeout?
-        case .ubiquityServerNotAvailable:
-          break
-        case .internal(let error):
-          // TODO: Handle internal error
-          break
-        }
-      } else {
-        // TODO: Handle regular errors
-      }
     }
   }
 
@@ -368,7 +350,32 @@ private extension CloudStorageManger {
     }
   }
 
-  // MARK: - Resolve conflicts
+  // MARK: - Error handling
+  func processError(_ error: Error) {
+    DispatchQueue.main.async {
+      LOG(.error, "Synchronization error: \(error)")
+      if let synchronizationError = error as? SynchronizationError {
+        switch synchronizationError {
+        case .fileUnavailable:
+          // TODO: Handle file unavailable error
+          break
+        case .fileNotUploadedDueToQuota, .iCloudIsNotAvailable, .containerNotFound:
+          // TODO: should we try to restart sync earlier? Or use some timeout?
+          //          self.stopSynchronization()
+          break
+        case .ubiquityServerNotAvailable:
+          break
+        case .internal(let error):
+          // TODO: Handle internal error
+          break
+        }
+      } else {
+        // TODO: Handle regular errors
+      }
+    }
+  }
+
+  // MARK: - Merge conflicts resolving
   func resolveVersionsConflict(_ cloudMetadataItem: CloudMetadataItem, completion: VoidResultCompletionHandler) {
     LOG(.debug, "Start resolving version conflict for file \(cloudMetadataItem.fileName)...")
 
@@ -435,6 +442,7 @@ private extension CloudStorageManger {
     return
   }
 
+  // MARK: - Helper methods
   static func generateNewFileUrl(for fileUrl: URL, addDeviceName: Bool = false) -> URL {
     let baseName = fileUrl.deletingPathExtension().lastPathComponent
     let fileExtension = fileUrl.pathExtension
@@ -520,7 +528,7 @@ fileprivate extension Data {
 
 // MARK: - Notification + iCloudSynchronizationDidChangeEnabledState
 extension Notification.Name {
-  static let iCloudSynchronizationDidChangeEnabledStateNotification = Notification.Name("iCloudSynchronizationDidChangeEnabledStateNotification")
+  static let iCloudSynchronizationDidChangeEnabledStateNotification = Notification.Name(kICloudSynchronizationDidChangeEnabledStateNotificationName)
 }
 
 @objc extension NSNotification {
