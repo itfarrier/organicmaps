@@ -474,6 +474,7 @@
 		ED4836C42BC9BF14004FA089 /* SynchronizationStateManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4836C12BC9BF14004FA089 /* SynchronizationStateManagerTests.swift */; };
 		ED4836C52BC9BF14004FA089 /* DefaultLocalDirectoryMonitorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4836C22BC9BF14004FA089 /* DefaultLocalDirectoryMonitorTests.swift */; };
 		ED4836C62BC9BF14004FA089 /* MetadataItemStubs.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4836C32BC9BF14004FA089 /* MetadataItemStubs.swift */; };
+		ED4836CC2BC9C013004FA089 /* MockLocalDirectoryMonitorDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4836C92BC9C013004FA089 /* MockLocalDirectoryMonitorDelegate.swift */; };
 		ED9966802B94FBC20083CE55 /* ColorPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED99667D2B94FBC20083CE55 /* ColorPicker.swift */; };
 		EDBD68072B625724005DD151 /* LocationServicesDisabledAlert.xib in Resources */ = {isa = PBXBuildFile; fileRef = EDBD68062B625724005DD151 /* LocationServicesDisabledAlert.xib */; };
 		EDBD680B2B62572E005DD151 /* LocationServicesDisabledAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBD680A2B62572E005DD151 /* LocationServicesDisabledAlert.swift */; };
@@ -1367,6 +1368,7 @@
 		ED4836C12BC9BF14004FA089 /* SynchronizationStateManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SynchronizationStateManagerTests.swift; sourceTree = "<group>"; };
 		ED4836C22BC9BF14004FA089 /* DefaultLocalDirectoryMonitorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DefaultLocalDirectoryMonitorTests.swift; sourceTree = "<group>"; };
 		ED4836C32BC9BF14004FA089 /* MetadataItemStubs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetadataItemStubs.swift; sourceTree = "<group>"; };
+		ED4836C92BC9C013004FA089 /* MockLocalDirectoryMonitorDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MockLocalDirectoryMonitorDelegate.swift; sourceTree = "<group>"; };
 		ED48BBB817C2B1E2003E7E92 /* CircleView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CircleView.h; sourceTree = "<group>"; };
 		ED48BBB917C2B1E2003E7E92 /* CircleView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CircleView.m; sourceTree = "<group>"; };
 		ED99667D2B94FBC20083CE55 /* ColorPicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorPicker.swift; sourceTree = "<group>"; };
@@ -2982,6 +2984,7 @@
 		ED1ADA312BC6B19E0029209F /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				ED4836C92BC9C013004FA089 /* MockLocalDirectoryMonitorDelegate.swift */,
 				ED4836C12BC9BF14004FA089 /* SynchronizationStateManagerTests.swift */,
 				ED4836C22BC9BF14004FA089 /* DefaultLocalDirectoryMonitorTests.swift */,
 				ED4836C32BC9BF14004FA089 /* MetadataItemStubs.swift */,
@@ -4486,6 +4489,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				ED4836C62BC9BF14004FA089 /* MetadataItemStubs.swift in Sources */,
+				ED4836CC2BC9C013004FA089 /* MockLocalDirectoryMonitorDelegate.swift in Sources */,
 				ED4836B22BC9BD46004FA089 /* SynchronizationStateManager.swift in Sources */,
 				ED4836C52BC9BF14004FA089 /* DefaultLocalDirectoryMonitorTests.swift in Sources */,
 				ED4836C42BC9BF14004FA089 /* SynchronizationStateManagerTests.swift in Sources */,
