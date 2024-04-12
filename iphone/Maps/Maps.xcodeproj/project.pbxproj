@@ -466,13 +466,13 @@
 		ED1263AB2B6F99F900AD99F3 /* UIView+AddSeparator.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED1263AA2B6F99F900AD99F3 /* UIView+AddSeparator.swift */; };
 		ED1ADA332BC6B1B40029209F /* CarPlayServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED1ADA322BC6B1B40029209F /* CarPlayServiceTests.swift */; };
 		ED3EAC202B03C88100220A4A /* BottomTabBarButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED3EAC1F2B03C88100220A4A /* BottomTabBarButton.swift */; };
-		ED4836A52BC9BBD5004FA089 /* CloudDirectoryMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED48369F2BC9BBD5004FA089 /* CloudDirectoryMonitor.swift */; };
 		ED4836A62BC9BBD5004FA089 /* CloudStorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4836A02BC9BBD5004FA089 /* CloudStorageManager.swift */; };
 		ED4836A72BC9BBD5004FA089 /* MetadataItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4836A12BC9BBD5004FA089 /* MetadataItem.swift */; };
-		ED4836A82BC9BBD5004FA089 /* LocalDirectoryMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4836A22BC9BBD5004FA089 /* LocalDirectoryMonitor.swift */; };
 		ED4836AF2BC9BD10004FA089 /* SynchronizationStateManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4836AB2BC9BD10004FA089 /* SynchronizationStateManagerTests.swift */; };
 		ED4836B02BC9BD10004FA089 /* MetadataItemStubs.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4836AE2BC9BD10004FA089 /* MetadataItemStubs.swift */; };
 		ED4836B22BC9BD46004FA089 /* SynchronizationStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4836B12BC9BD46004FA089 /* SynchronizationStateManager.swift */; };
+		ED4836B92BC9BE61004FA089 /* DefaultLocalDirectoryMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4836B52BC9BE61004FA089 /* DefaultLocalDirectoryMonitor.swift */; };
+		ED4836BA2BC9BE61004FA089 /* iCloudDirectoryMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4836B82BC9BE61004FA089 /* iCloudDirectoryMonitor.swift */; };
 		ED9966802B94FBC20083CE55 /* ColorPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED99667D2B94FBC20083CE55 /* ColorPicker.swift */; };
 		EDBD68072B625724005DD151 /* LocationServicesDisabledAlert.xib in Resources */ = {isa = PBXBuildFile; fileRef = EDBD68062B625724005DD151 /* LocationServicesDisabledAlert.xib */; };
 		EDBD680B2B62572E005DD151 /* LocationServicesDisabledAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBD680A2B62572E005DD151 /* LocationServicesDisabledAlert.swift */; };
@@ -1358,13 +1358,13 @@
 		ED1263AA2B6F99F900AD99F3 /* UIView+AddSeparator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+AddSeparator.swift"; sourceTree = "<group>"; };
 		ED1ADA322BC6B1B40029209F /* CarPlayServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarPlayServiceTests.swift; sourceTree = "<group>"; };
 		ED3EAC1F2B03C88100220A4A /* BottomTabBarButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomTabBarButton.swift; sourceTree = "<group>"; };
-		ED48369F2BC9BBD5004FA089 /* CloudDirectoryMonitor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CloudDirectoryMonitor.swift; sourceTree = "<group>"; };
 		ED4836A02BC9BBD5004FA089 /* CloudStorageManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CloudStorageManager.swift; sourceTree = "<group>"; };
 		ED4836A12BC9BBD5004FA089 /* MetadataItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetadataItem.swift; sourceTree = "<group>"; };
-		ED4836A22BC9BBD5004FA089 /* LocalDirectoryMonitor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocalDirectoryMonitor.swift; sourceTree = "<group>"; };
 		ED4836AB2BC9BD10004FA089 /* SynchronizationStateManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SynchronizationStateManagerTests.swift; path = OMapsTests/SynchronizationStateManagerTests.swift; sourceTree = SOURCE_ROOT; };
 		ED4836AE2BC9BD10004FA089 /* MetadataItemStubs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MetadataItemStubs.swift; path = OMapsTests/MetadataItemStubs.swift; sourceTree = SOURCE_ROOT; };
 		ED4836B12BC9BD46004FA089 /* SynchronizationStateManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SynchronizationStateManager.swift; sourceTree = "<group>"; };
+		ED4836B52BC9BE61004FA089 /* DefaultLocalDirectoryMonitor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DefaultLocalDirectoryMonitor.swift; sourceTree = "<group>"; };
+		ED4836B82BC9BE61004FA089 /* iCloudDirectoryMonitor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = iCloudDirectoryMonitor.swift; sourceTree = "<group>"; };
 		ED48BBB817C2B1E2003E7E92 /* CircleView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CircleView.h; sourceTree = "<group>"; };
 		ED48BBB917C2B1E2003E7E92 /* CircleView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CircleView.m; sourceTree = "<group>"; };
 		ED99667D2B94FBC20083CE55 /* ColorPicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorPicker.swift; sourceTree = "<group>"; };
@@ -2990,11 +2990,11 @@
 		ED48369E2BC9BBD5004FA089 /* iCloud */ = {
 			isa = PBXGroup;
 			children = (
+				ED4836B52BC9BE61004FA089 /* DefaultLocalDirectoryMonitor.swift */,
+				ED4836B82BC9BE61004FA089 /* iCloudDirectoryMonitor.swift */,
 				ED4836B12BC9BD46004FA089 /* SynchronizationStateManager.swift */,
-				ED48369F2BC9BBD5004FA089 /* CloudDirectoryMonitor.swift */,
 				ED4836A02BC9BBD5004FA089 /* CloudStorageManager.swift */,
 				ED4836A12BC9BBD5004FA089 /* MetadataItem.swift */,
-				ED4836A22BC9BBD5004FA089 /* LocalDirectoryMonitor.swift */,
 			);
 			path = iCloud;
 			sourceTree = "<group>";
@@ -4072,6 +4072,7 @@
 				4767CDA420AAF66B00BD8166 /* NSAttributedString+HTML.swift in Sources */,
 				6741A9A91BF340DE002C974C /* MWMDefaultAlert.mm in Sources */,
 				ED4836A72BC9BBD5004FA089 /* MetadataItem.swift in Sources */,
+				ED4836B92BC9BE61004FA089 /* DefaultLocalDirectoryMonitor.swift in Sources */,
 				990F33B624BC915200D0F426 /* SearchActionBarView.swift in Sources */,
 				99514BBA23E82B450085D3A7 /* ElevationProfileViewController.swift in Sources */,
 				340708781F2B5D6C00029ECC /* DimBackground.swift in Sources */,
@@ -4091,6 +4092,7 @@
 				340475811E081B3300C92850 /* iosOGLContextFactory.mm in Sources */,
 				99F3EB0623F418A200C713F8 /* PlacePagePresenter.swift in Sources */,
 				AA1C7E3E269A2DD600BAADF2 /* EditTrackViewController.swift in Sources */,
+				ED4836BA2BC9BE61004FA089 /* iCloudDirectoryMonitor.swift in Sources */,
 				34AB66561FC5AA330078E451 /* TransportTransitPedestrian.swift in Sources */,
 				993DF0C823F6BD0600AC231A /* ElevationDetailsViewController.swift in Sources */,
 				BB8123D62130427E00ADE512 /* MetalContextFactory.mm in Sources */,
@@ -4154,7 +4156,6 @@
 				99C964302428C27A00E41723 /* PlacePageHeaderView.swift in Sources */,
 				9989273A2449E60200260CE2 /* BottomMenuViewController.swift in Sources */,
 				47E3C72D2111E6A2008B3B27 /* FadeTransitioning.swift in Sources */,
-				ED4836A52BC9BBD5004FA089 /* CloudDirectoryMonitor.swift in Sources */,
 				34845DAF1E1649F6003D55B9 /* DownloaderNoResultsEmbedViewController.swift in Sources */,
 				EDFDFB482B7139670013A44C /* SocialMedia.swift in Sources */,
 				993DF0B523F6B2EF00AC231A /* PlacePageElevationLayout.swift in Sources */,
@@ -4437,7 +4438,6 @@
 				F6D67CDC2062B9C00032FD38 /* BCCreateCategoryAlert.swift in Sources */,
 				F6E2FF601E097BA00083EBEC /* MWMSettingsViewController.mm in Sources */,
 				F6E2FE2B1E097BA00083EBEC /* MWMStreetEditorEditTableViewCell.m in Sources */,
-				ED4836A82BC9BBD5004FA089 /* LocalDirectoryMonitor.swift in Sources */,
 				34AB66891FC5AA330078E451 /* NavigationControlView.swift in Sources */,
 				479EE94A2292FB03009DEBA6 /* ActivityIndicator.swift in Sources */,
 				ED3EAC202B03C88100220A4A /* BottomTabBarButton.swift in Sources */,
