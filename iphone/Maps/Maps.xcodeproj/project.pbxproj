@@ -470,6 +470,9 @@
 		ED4836A62BC9BBD5004FA089 /* CloudStorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4836A02BC9BBD5004FA089 /* CloudStorageManager.swift */; };
 		ED4836A72BC9BBD5004FA089 /* MetadataItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4836A12BC9BBD5004FA089 /* MetadataItem.swift */; };
 		ED4836A82BC9BBD5004FA089 /* LocalDirectoryMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4836A22BC9BBD5004FA089 /* LocalDirectoryMonitor.swift */; };
+		ED4836AF2BC9BD10004FA089 /* SynchronizationStateManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4836AB2BC9BD10004FA089 /* SynchronizationStateManagerTests.swift */; };
+		ED4836B02BC9BD10004FA089 /* MetadataItemStubs.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4836AE2BC9BD10004FA089 /* MetadataItemStubs.swift */; };
+		ED4836B22BC9BD46004FA089 /* SynchronizationStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4836B12BC9BD46004FA089 /* SynchronizationStateManager.swift */; };
 		ED9966802B94FBC20083CE55 /* ColorPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED99667D2B94FBC20083CE55 /* ColorPicker.swift */; };
 		EDBD68072B625724005DD151 /* LocationServicesDisabledAlert.xib in Resources */ = {isa = PBXBuildFile; fileRef = EDBD68062B625724005DD151 /* LocationServicesDisabledAlert.xib */; };
 		EDBD680B2B62572E005DD151 /* LocationServicesDisabledAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBD680A2B62572E005DD151 /* LocationServicesDisabledAlert.swift */; };
@@ -1359,6 +1362,9 @@
 		ED4836A02BC9BBD5004FA089 /* CloudStorageManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CloudStorageManager.swift; sourceTree = "<group>"; };
 		ED4836A12BC9BBD5004FA089 /* MetadataItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetadataItem.swift; sourceTree = "<group>"; };
 		ED4836A22BC9BBD5004FA089 /* LocalDirectoryMonitor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocalDirectoryMonitor.swift; sourceTree = "<group>"; };
+		ED4836AB2BC9BD10004FA089 /* SynchronizationStateManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SynchronizationStateManagerTests.swift; path = OMapsTests/SynchronizationStateManagerTests.swift; sourceTree = SOURCE_ROOT; };
+		ED4836AE2BC9BD10004FA089 /* MetadataItemStubs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MetadataItemStubs.swift; path = OMapsTests/MetadataItemStubs.swift; sourceTree = SOURCE_ROOT; };
+		ED4836B12BC9BD46004FA089 /* SynchronizationStateManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SynchronizationStateManager.swift; sourceTree = "<group>"; };
 		ED48BBB817C2B1E2003E7E92 /* CircleView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CircleView.h; sourceTree = "<group>"; };
 		ED48BBB917C2B1E2003E7E92 /* CircleView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CircleView.m; sourceTree = "<group>"; };
 		ED99667D2B94FBC20083CE55 /* ColorPicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorPicker.swift; sourceTree = "<group>"; };
@@ -2974,6 +2980,8 @@
 		ED1ADA312BC6B19E0029209F /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				ED4836AE2BC9BD10004FA089 /* MetadataItemStubs.swift */,
+				ED4836AB2BC9BD10004FA089 /* SynchronizationStateManagerTests.swift */,
 				ED1ADA322BC6B1B40029209F /* CarPlayServiceTests.swift */,
 			);
 			path = Tests;
@@ -2982,6 +2990,7 @@
 		ED48369E2BC9BBD5004FA089 /* iCloud */ = {
 			isa = PBXGroup;
 			children = (
+				ED4836B12BC9BD46004FA089 /* SynchronizationStateManager.swift */,
 				ED48369F2BC9BBD5004FA089 /* CloudDirectoryMonitor.swift */,
 				ED4836A02BC9BBD5004FA089 /* CloudStorageManager.swift */,
 				ED4836A12BC9BBD5004FA089 /* MetadataItem.swift */,
@@ -4473,6 +4482,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ED4836B02BC9BD10004FA089 /* MetadataItemStubs.swift in Sources */,
+				ED4836AF2BC9BD10004FA089 /* SynchronizationStateManagerTests.swift in Sources */,
+				ED4836B22BC9BD46004FA089 /* SynchronizationStateManager.swift in Sources */,
 				ED1ADA332BC6B1B40029209F /* CarPlayServiceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
