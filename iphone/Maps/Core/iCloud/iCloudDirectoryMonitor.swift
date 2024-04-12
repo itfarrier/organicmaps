@@ -12,7 +12,6 @@ protocol UbiquitousDirectoryMonitorDelegate : AnyObject {
 
 private let kUDCloudIdentityKey = "com.apple.organicmaps.UbiquityIdentityToken"
 private let kDocumentsDirectoryName = "Documents"
-private let kFileExtensionKML = "kml" // only the .kml is supported
 
 final class iCloudDirectoryMonitor: NSObject, UbiquitousDirectoryMonitor {
 
@@ -24,10 +23,9 @@ final class iCloudDirectoryMonitor: NSObject, UbiquitousDirectoryMonitor {
     return identifier
   }()
 
-  static let `default` = iCloudDirectoryMonitor(fileManager: FileManager.default, cloudContainerIdentifier: iCloudDirectoryMonitor.sharedContainerIdentifier)
-
   let containerIdentifier: String
   let fileManager: FileManager
+  private let fileType: FileType
   private(set) var metadataQuery: NSMetadataQuery?
   private(set) var ubiquitousDocumentsDirectory: URL?
 
@@ -36,16 +34,16 @@ final class iCloudDirectoryMonitor: NSObject, UbiquitousDirectoryMonitor {
   private(set) var isPaused: Bool = true
   weak var delegate: UbiquitousDirectoryMonitorDelegate?
 
-  init(fileManager: FileManager, cloudContainerIdentifier: String) {
+  init(fileManager: FileManager = .default, cloudContainerIdentifier: String = iCloudDirectoryMonitor.sharedContainerIdentifier, fileType: FileType) {
     self.fileManager = fileManager
     self.containerIdentifier = cloudContainerIdentifier
+    self.fileType = fileType
     super.init()
 
     fetchUbiquityDirectoryUrl()
     subscribeOnMetadataQueryNotifications()
-    subscribeToCloudAvailabilityNotifications()
+    subscribeOnCloudAvailabilityNotifications()
   }
-
 
   // MARK: - Public methods
   func start(completion: VoidResultCompletionHandler? = nil) {
@@ -118,7 +116,7 @@ final class iCloudDirectoryMonitor: NSObject, UbiquitousDirectoryMonitor {
 // MARK: - Private
 private extension iCloudDirectoryMonitor {
 
-  func subscribeToCloudAvailabilityNotifications() {
+  func subscribeOnCloudAvailabilityNotifications() {
     NotificationCenter.default.addObserver(self, selector: #selector(cloudAvailabilityChanged(_:)), name: .NSUbiquityIdentityDidChange, object: nil)
   }
 
@@ -138,7 +136,7 @@ private extension iCloudDirectoryMonitor {
     let metadataQuery = NSMetadataQuery()
     metadataQuery.notificationBatchingInterval = 1
     metadataQuery.searchScopes = [NSMetadataQueryUbiquitousDocumentsScope]
-    metadataQuery.predicate = NSPredicate(format: "%K LIKE %@", NSMetadataItemFSNameKey, "*.\(kFileExtensionKML)")
+    metadataQuery.predicate = NSPredicate(format: "%K LIKE %@", NSMetadataItemFSNameKey, "*.\(fileType.fileExtension)")
     metadataQuery.sortDescriptors = [NSSortDescriptor(key: NSMetadataItemFSNameKey, ascending: true)]
     self.metadataQuery = metadataQuery
   }
@@ -214,10 +212,11 @@ private extension iCloudDirectoryMonitor {
       return []
     }
     // On iOS we can get the list of deleted items from the .Trash directory but only when iCloud is enabled.
-    guard let trashDirectoryUrl = ubiquitousDocumentsDirectory?.appendingPathComponent(kTrashDirectoryName),
+    guard let ubiquitousDocumentsDirectory,
+          let trashDirectoryUrl = fileManager.trashDirectoryUrl(for: ubiquitousDocumentsDirectory),
           let removedItems = try? fileManager.contentsOfDirectory(at: trashDirectoryUrl,
-                                                                          includingPropertiesForKeys: [.isDirectoryKey],
-                                                                          options: [.skipsPackageDescendants, .skipsSubdirectoryDescendants]) else {
+                                                                  includingPropertiesForKeys: [.isDirectoryKey],
+                                                                  options: [.skipsPackageDescendants, .skipsSubdirectoryDescendants]) else {
       return []
     }
     let removedCloudMetadataItems = CloudContents(removedItems.compactMap { url in

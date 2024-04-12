@@ -2,15 +2,27 @@ enum VoidResult {
   case success
   case failure(Error)
 }
+// TODO: Remove this type and use custom UTTypeIdentifier that is registered into the Info.plist after updating to the iOS >= 14.0.
+struct FileType {
+  let fileExtension: String
+  let typeIdentifier: String
+}
+
+extension FileType {
+  static let kml = FileType(fileExtension: "kml", typeIdentifier: "com.google.earth.kml")
+}
 
 typealias VoidResultCompletionHandler = (VoidResult) -> Void
 
 let kTrashDirectoryName = ".Trash"
-let kUDDidFinishInitialCloudSynchronization = "kUDDidFinishInitialCloudSynchronization"
-let kICloudSynchronizationDidChangeEnabledStateNotificationName = "iCloudSynchronizationDidChangeEnabledStateNotification"
+private let kBookmarksDirectoryName = "bookmarks"
+private let kICloudSynchronizationDidChangeEnabledStateNotificationName = "iCloudSynchronizationDidChangeEnabledStateNotification"
+private let kUDDidFinishInitialCloudSynchronization = "kUDDidFinishInitialCloudSynchronization"
 
 @objc @objcMembers final class CloudStorageManger: NSObject {
 
+  private let fileManager: FileManager
+  private let fileType: FileType
   private let fileCoordinator = NSFileCoordinator()
   private var localDirectoryMonitor: LocalDirectoryMonitor
   private var cloudDirectoryMonitor: UbiquitousDirectoryMonitor
@@ -27,16 +39,46 @@ let kICloudSynchronizationDidChangeEnabledStateNotificationName = "iCloudSynchro
     return !UserDefaults.standard.bool(forKey: kUDDidFinishInitialCloudSynchronization)
   }
 
-  static let shared = CloudStorageManger()
+  static let shared: CloudStorageManger = {
+    let fileManager = FileManager.default
+    let localDirectory = fileManager.bookmarksDirectoryUrl
+    let fileType = FileType.kml // only kml is supported for now
+    let cloudDirectoryMonitor = iCloudDirectoryMonitor(fileManager: fileManager, fileType: fileType)
+    let localDirectoryMonitor = DefaultLocalDirectoryMonitor(fileManager: fileManager, directory: localDirectory, fileType: fileType)
+    let synchronizationStateManager = DefaultSynchronizationStateManager(isInitialSynchronization: isInitialSynchronization)
+    return CloudStorageManger(fileManager: fileManager,
+                              fileType: fileType,
+                              cloudDirectoryMonitor: cloudDirectoryMonitor,
+                              localDirectoryMonitor: localDirectoryMonitor,
+                              synchronizationStateManager: synchronizationStateManager)
+  }()
 
   // MARK: - Initialization
-  init(cloudDirectoryMonitor: iCloudDirectoryMonitor = iCloudDirectoryMonitor.default,
-       localDirectoryMonitor: DefaultLocalDirectoryMonitor = DefaultLocalDirectoryMonitor.default,
-       synchronizationStateManager: SynchronizationStateManager = DefaultSynchronizationStateManager(isInitialSynchronization: isInitialSynchronization)) {
+  private init(fileManager: FileManager,
+               fileType: FileType,
+               cloudDirectoryMonitor: UbiquitousDirectoryMonitor,
+               localDirectoryMonitor: LocalDirectoryMonitor,
+               synchronizationStateManager: SynchronizationStateManager) {
+    self.fileManager = fileManager
+    self.fileType = fileType
     self.cloudDirectoryMonitor = cloudDirectoryMonitor
     self.localDirectoryMonitor = localDirectoryMonitor
     self.synchronizationStateManager = synchronizationStateManager
     super.init()
+  }
+
+  static func buildWith(fileManager: FileManager,
+                        fileType: FileType,
+                        cloudContainerIdentifier: String,
+                        localDirectory: URL) -> CloudStorageManger {
+    let cloudDirectoryMonitor = iCloudDirectoryMonitor(fileManager: fileManager, cloudContainerIdentifier: cloudContainerIdentifier, fileType: fileType)
+    let localDirectoryMonitor = DefaultLocalDirectoryMonitor(fileManager: fileManager, directory: localDirectory, fileType: fileType)
+    let synchronizationStateManager = DefaultSynchronizationStateManager(isInitialSynchronization: CloudStorageManger.isInitialSynchronization)
+    return CloudStorageManger(fileManager: fileManager,
+                              fileType: fileType,
+                              cloudDirectoryMonitor: cloudDirectoryMonitor,
+                              localDirectoryMonitor: localDirectoryMonitor,
+                              synchronizationStateManager: synchronizationStateManager)
   }
 
   @objc func start() {
@@ -238,7 +280,7 @@ private extension CloudStorageManger {
   func startDownloading(_ cloudMetadataItem: CloudMetadataItem, completion: VoidResultCompletionHandler) {
     do {
       LOG(.debug, "Start downloading file: \(cloudMetadataItem.fileName)...")
-      try FileManager.default.startDownloadingUbiquitousItem(at: cloudMetadataItem.fileUrl)
+      try fileManager.startDownloadingUbiquitousItem(at: cloudMetadataItem.fileUrl)
       completion(.success)
     } catch {
       completion(.failure(error))
@@ -269,14 +311,14 @@ private extension CloudStorageManger {
   func removeFromTheLocalContainer(_ cloudMetadataItem: CloudMetadataItem, completion: VoidResultCompletionHandler) {
     let targetLocalFileUrl = cloudMetadataItem.relatedLocalItemUrl(to: localDirectoryUrl)
 
-    guard FileManager.default.fileExists(atPath: targetLocalFileUrl.path) else {
+    guard fileManager.fileExists(atPath: targetLocalFileUrl.path) else {
       LOG(.debug, "File \(cloudMetadataItem.fileName) doesn't exist in the local directory and cannot be removed.")
       completion(.success)
       return
     }
 
     do {
-      try FileManager.default.removeItem(at: targetLocalFileUrl)
+      try fileManager.removeItem(at: targetLocalFileUrl)
       needsToReloadBookmarksOnTheMap = true
       LOG(.debug, "File \(cloudMetadataItem.fileName) was removed from the local directory successfully.")
       completion(.success)
@@ -323,7 +365,7 @@ private extension CloudStorageManger {
         do {
           let targetCloudFileUrl = localMetadataItem.relatedCloudItemUrl(to: cloudDirectoryUrl)
           try removeDuplicatedFileFromTrashDirectoryIfNeeded(cloudDirectoryUrl: cloudDirectoryUrl, fileName: localMetadataItem.fileName)
-          try FileManager.default.trashItem(at: targetCloudFileUrl, resultingItemURL: nil)
+          try self.fileManager.trashItem(at: targetCloudFileUrl, resultingItemURL: nil)
           completion(.success)
         } catch {
           completion(.failure(error))
@@ -341,11 +383,11 @@ private extension CloudStorageManger {
       }
       let trashDirectoryUrl = cloudDirectoryUrl.appendingPathComponent(kTrashDirectoryName, isDirectory: true)
       let fileInTrashDirectoryUrl = trashDirectoryUrl.appendingPathComponent(fileName)
-      let trashDirectoryContent = try FileManager.default.contentsOfDirectory(at: trashDirectoryUrl,
+      let trashDirectoryContent = try fileManager.contentsOfDirectory(at: trashDirectoryUrl,
                                                                               includingPropertiesForKeys: [],
                                                                               options: [.skipsPackageDescendants, .skipsSubdirectoryDescendants])
       if trashDirectoryContent.contains(fileInTrashDirectoryUrl) {
-        try FileManager.default.removeItem(at: fileInTrashDirectoryUrl)
+        try fileManager.removeItem(at: fileInTrashDirectoryUrl)
       }
     }
   }
@@ -397,14 +439,14 @@ private extension CloudStorageManger {
       return
     }
 
-    let targetCloudFileCopyUrl = Self.generateNewFileUrl(for: cloudMetadataItem.fileUrl)
+    let targetCloudFileCopyUrl = generateNewFileUrl(for: cloudMetadataItem.fileUrl)
     var coordinationError: NSError?
     fileCoordinator.coordinate(writingItemAt: currentVersion.url,
                                options: [],
                                writingItemAt: targetCloudFileCopyUrl,
                                options: .forReplacing,
                                error: &coordinationError) { readingURL, writingURL in
-      guard !FileManager.default.fileExists(atPath: targetCloudFileCopyUrl.path) else {
+      guard !fileManager.fileExists(atPath: targetCloudFileCopyUrl.path) else {
         needsToReloadBookmarksOnTheMap = true
         completion(.success)
         return
@@ -412,7 +454,7 @@ private extension CloudStorageManger {
       do {
         // TODO: Check if current can be newer than latest
         //        if currentVersion.modificationDate! < latestVersionInConflict.modificationDate! {
-        try FileManager.default.copyItem(at: readingURL, to: writingURL)
+        try fileManager.copyItem(at: readingURL, to: writingURL)
         try latestVersionInConflict.replaceItem(at: readingURL)
         //        } else {
         //
@@ -434,7 +476,7 @@ private extension CloudStorageManger {
   func resolveInitialSynchronizationConflict(_ localMetadataItem: LocalMetadataItem, completion: VoidResultCompletionHandler) {
     LOG(.debug, "Start resolving initial sync conflict for file \(localMetadataItem.fileName) by copying with a new name...")
     do {
-      try FileManager.default.copyItem(at: localMetadataItem.fileUrl, to: Self.generateNewFileUrl(for: localMetadataItem.fileUrl, addDeviceName: true))
+      try fileManager.copyItem(at: localMetadataItem.fileUrl, to: generateNewFileUrl(for: localMetadataItem.fileUrl, addDeviceName: true))
       completion(.success)
     } catch {
       completion(.failure(error))
@@ -443,7 +485,7 @@ private extension CloudStorageManger {
   }
 
   // MARK: - Helper methods
-  static func generateNewFileUrl(for fileUrl: URL, addDeviceName: Bool = false) -> URL {
+  func generateNewFileUrl(for fileUrl: URL, addDeviceName: Bool = false) -> URL {
     let baseName = fileUrl.deletingPathExtension().lastPathComponent
     let fileExtension = fileUrl.pathExtension
 
@@ -465,7 +507,7 @@ private extension CloudStorageManger {
     let newFileName = finalBaseName + deviceName + "." + fileExtension
     let newFileUrl = fileUrl.deletingLastPathComponent().appendingPathComponent(newFileName)
 
-    if FileManager.default.fileExists(atPath: newFileUrl.path) {
+    if fileManager.fileExists(atPath: newFileUrl.path) {
       return generateNewFileUrl(for: newFileUrl)
     } else {
       return newFileUrl
@@ -507,22 +549,14 @@ private extension CloudStorageManger {
   }
 }
 
-// MARK: - URL + ResourceValues
-fileprivate extension URL {
-  mutating func setResourceModificationDate(_ date: Date) throws {
-    var resource = try resourceValues(forKeys:[.contentModificationDateKey])
-    resource.contentModificationDate = date
-    try setResourceValues(resource)
+// MARK: - FileManager + Directories
+extension FileManager {
+  var bookmarksDirectoryUrl: URL {
+    urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent(kBookmarksDirectoryName, isDirectory: true)
   }
-}
 
-fileprivate extension Data {
-  func write(to url: URL, options: Data.WritingOptions = .atomic, lastModificationDate: TimeInterval? = nil) throws {
-    var url = url
-    try write(to: url, options: options)
-    if let lastModificationDate {
-      try url.setResourceModificationDate(Date(timeIntervalSince1970: lastModificationDate))
-    }
+  func trashDirectoryUrl(for baseDirectoryUrl: URL) -> URL? {
+    baseDirectoryUrl.appendingPathComponent(kTrashDirectoryName)
   }
 }
 
@@ -533,4 +567,23 @@ extension Notification.Name {
 
 @objc extension NSNotification {
   public static let iCloudSynchronizationDidChangeEnabledState = Notification.Name.iCloudSynchronizationDidChangeEnabledStateNotification
+}
+
+// MARK: - URL + ResourceValues
+private extension URL {
+  mutating func setResourceModificationDate(_ date: Date) throws {
+    var resource = try resourceValues(forKeys:[.contentModificationDateKey])
+    resource.contentModificationDate = date
+    try setResourceValues(resource)
+  }
+}
+
+private extension Data {
+  func write(to url: URL, options: Data.WritingOptions = .atomic, lastModificationDate: TimeInterval? = nil) throws {
+    var url = url
+    try write(to: url, options: options)
+    if let lastModificationDate {
+      try url.setResourceModificationDate(Date(timeIntervalSince1970: lastModificationDate))
+    }
+  }
 }

@@ -3,15 +3,15 @@ import XCTest
 
 final class DefaultLocalDirectoryMonitorTests: XCTestCase {
 
+  let fileManager = FileManager.default
+  let tempDirectory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
   var directoryMonitor: DefaultLocalDirectoryMonitor!
   var mockDelegate: MockLocalDirectoryMonitorDelegate!
-  let tempDirectoryName = UUID().uuidString
 
   override func setUp() {
     super.setUp()
     // Setup with a temporary directory and a mock delegate
-    let tempDirectory = FileManager.default.temporaryDirectory.appendingPathComponent(tempDirectoryName)
-    directoryMonitor = DefaultLocalDirectoryMonitor(directory: tempDirectory, matching: kKMLTypeIdentifier, requestedResourceKeys: [.nameKey])
+    directoryMonitor = DefaultLocalDirectoryMonitor(fileManager: fileManager, directory: tempDirectory, fileType: .kml)
     mockDelegate = MockLocalDirectoryMonitorDelegate()
     directoryMonitor.delegate = mockDelegate
   }
@@ -19,11 +19,12 @@ final class DefaultLocalDirectoryMonitorTests: XCTestCase {
   override func tearDown() {
     directoryMonitor.stop()
     mockDelegate = nil
+    try? fileManager.removeItem(at: tempDirectory)
     super.tearDown()
   }
 
   func testInitialization() {
-    XCTAssertEqual(directoryMonitor.directory, FileManager.default.temporaryDirectory.appendingPathComponent(tempDirectoryName), "Monitor initialized with incorrect directory.")
+    XCTAssertEqual(directoryMonitor.directory, tempDirectory, "Monitor initialized with incorrect directory.")
     XCTAssertFalse(directoryMonitor.isStarted, "Monitor should not be started initially.")
     XCTAssertTrue(directoryMonitor.isPaused, "Monitor should be paused initially.")
   }
@@ -76,20 +77,24 @@ final class DefaultLocalDirectoryMonitorTests: XCTestCase {
 
   func testContentUpdateDetection() {
     let startExpectation = expectation(description: "Start monitoring")
+    let didFinishGatheringExpectation = expectation(description: "didFinishGathering called")
+    let didUpdateExpectation = expectation(description: "didUpdate called")
+
+    mockDelegate.didFinishGatheringExpectation = didFinishGatheringExpectation
+    mockDelegate.didUpdateExpectation = didUpdateExpectation
+
+    
     directoryMonitor.start { result in
       if case .success = result {
         XCTAssertTrue(self.directoryMonitor.isStarted, "Monitor should be started.")
       }
       startExpectation.fulfill()
     }
-    wait(for: [startExpectation], timeout: 5.0)
 
-    let fileURL = directoryMonitor.directory.appendingPathComponent("test.kml")
-    FileManager.default.createFile(atPath: fileURL.path, contents: nil, attributes: nil)
+    let fileURL = tempDirectory.appendingPathComponent("test.kml")
+    self.fileManager.createFile(atPath: fileURL.path, contents: Data(), attributes: nil)
 
-    mockDelegate.didUpdateExpectation = expectation(description: "didUpdate called")
-    wait(for: [mockDelegate.didUpdateExpectation!], timeout: 5.0)
-
+    wait(for: [startExpectation, didFinishGatheringExpectation, didUpdateExpectation], timeout: 120.0)
     XCTAssertTrue(directoryMonitor.contents.contains { $0.fileUrl == fileURL }, "Contents should contain the newly added file.")
   }
 }

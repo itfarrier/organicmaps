@@ -19,10 +19,6 @@ protocol LocalDirectoryMonitorDelegate : AnyObject {
   func didReceiveLocalMonitorError(_ error: Error)
 }
 
-// TODO: Remove this constant and use custom UTTypeIdentifier that is registered into the Info.plist after updating to the iOS >= 14.0.
-let kKMLTypeIdentifier = "com.google.earth.kml" // only the .kml is supported
-private let kBookmarksDirectoryName = "bookmarks"
-
 final class DefaultLocalDirectoryMonitor: LocalDirectoryMonitor {
 
   typealias Delegate = LocalDirectoryMonitorDelegate
@@ -33,13 +29,9 @@ final class DefaultLocalDirectoryMonitor: LocalDirectoryMonitor {
     case debounce(dirSource: DispatchSourceFileSystemObject, timer: Timer)
   }
 
-  static let `default` = DefaultLocalDirectoryMonitor(directory: FileManager.default.bookmarksDirectoryUrl,
-                                               matching: kKMLTypeIdentifier,
-                                               requestedResourceKeys: [.nameKey])
-
-  private let typeIdentifier: String
-  private let requestedResourceKeys: Set<URLResourceKey>
-  private let actualResourceKeys: [URLResourceKey]
+  private let fileManager: FileManager
+  private let fileType: FileType
+  private let resourceKeys: [URLResourceKey] = [.nameKey, .typeIdentifierKey]
   private var source: DispatchSourceFileSystemObject?
   private var state: State = .stopped
   private(set) var contents = LocalContents()
@@ -50,11 +42,10 @@ final class DefaultLocalDirectoryMonitor: LocalDirectoryMonitor {
   private(set) var isPaused: Bool = true
   weak var delegate: Delegate?
 
-  init(directory: URL, matching typeIdentifier: String, requestedResourceKeys: Set<URLResourceKey>) {
+  init(fileManager: FileManager, directory: URL, fileType: FileType) {
+    self.fileManager = fileManager
     self.directory = directory
-    self.typeIdentifier = typeIdentifier
-    self.requestedResourceKeys = requestedResourceKeys
-    self.actualResourceKeys = [URLResourceKey](requestedResourceKeys.union([.typeIdentifierKey]))
+    self.fileType = fileType
   }
 
   // MARK: - Public methods
@@ -68,9 +59,8 @@ final class DefaultLocalDirectoryMonitor: LocalDirectoryMonitor {
       return
     }
 
-    
     do {
-      let directorySource = try DefaultLocalDirectoryMonitor.source(for: directory)
+      let directorySource = try DefaultLocalDirectoryMonitor.source(fileManager: fileManager, for: directory)
       directorySource.setEventHandler { [weak self] in
         self?.queueDidFire()
       }
@@ -104,10 +94,10 @@ final class DefaultLocalDirectoryMonitor: LocalDirectoryMonitor {
   }
 
   // MARK: - Private
-  private static func source(for directory: URL) throws -> DispatchSourceFileSystemObject {
-    if !FileManager.default.fileExists(atPath: directory.path) {
+  private static func source(fileManager: FileManager, for directory: URL) throws -> DispatchSourceFileSystemObject {
+    if !fileManager.fileExists(atPath: directory.path) {
       do {
-        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        try fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
       } catch {
         throw error
       }
@@ -143,8 +133,8 @@ final class DefaultLocalDirectoryMonitor: LocalDirectoryMonitor {
     }
   }
 
-  private static func contents(of directory: URL, matching typeIdentifier: String, including: [URLResourceKey]) -> Set<URL> {
-    guard let rawContents = try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: including, options: [.skipsHiddenFiles]) else {
+  private static func contents(fileManager: FileManager, of directory: URL, matching typeIdentifier: String, including: [URLResourceKey]) -> Set<URL> {
+    guard let rawContents = try? fileManager.contentsOfDirectory(at: directory, includingPropertiesForKeys: including, options: [.skipsHiddenFiles]) else {
       return []
     }
     // Filter the contents to include only those that match the type identifier.
@@ -164,7 +154,7 @@ final class DefaultLocalDirectoryMonitor: LocalDirectoryMonitor {
     timer.invalidate()
     state = .started(dirSource: dirSource)
 
-    let newContents = DefaultLocalDirectoryMonitor.contents(of: directory, matching: typeIdentifier, including: actualResourceKeys)
+    let newContents = DefaultLocalDirectoryMonitor.contents(fileManager: fileManager, of: directory, matching: fileType.typeIdentifier, including: resourceKeys)
     let newContentMetadataItems = LocalContents(newContents.compactMap { url in
       do {
         let metadataItem = try LocalMetadataItem(fileUrl: url)
@@ -191,11 +181,5 @@ private extension DefaultLocalDirectoryMonitor.State {
     case .started: return true
     case .debounce: return true
     }
-  }
-}
-
-private extension FileManager {
-  var bookmarksDirectoryUrl: URL {
-    urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent(kBookmarksDirectoryName, isDirectory: true)
   }
 }
