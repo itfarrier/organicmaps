@@ -19,6 +19,7 @@ protocol LocalDirectoryMonitorDelegate : AnyObject {
   func didReceiveLocalMonitorError(_ error: Error)
 }
 
+// TODO: Remove this constant and use custom UTTypeIdentifier that is registered into the Info.plist after updating to the iOS >= 14.0.
 let kKMLTypeIdentifier = "com.google.earth.kml" // only the .kml is supported
 private let kBookmarksDirectoryName = "bookmarks"
 
@@ -67,9 +68,6 @@ final class DefaultLocalDirectoryMonitor: LocalDirectoryMonitor {
       return
     }
 
-    let nowTimer = Timer.scheduledTimer(withTimeInterval: .zero, repeats: false) { [weak self] _ in
-      self?.debounceTimerDidFire()
-    }
     
     do {
       let directorySource = try DefaultLocalDirectoryMonitor.source(for: directory)
@@ -77,6 +75,9 @@ final class DefaultLocalDirectoryMonitor: LocalDirectoryMonitor {
         self?.queueDidFire()
       }
       source = directorySource
+      let nowTimer = Timer.scheduledTimer(withTimeInterval: .zero, repeats: false) { [weak self] _ in
+        self?.debounceTimerDidFire()
+      }
       state = .debounce(dirSource: directorySource, timer: nowTimer)
       resume()
       completion?(.success)
@@ -124,14 +125,15 @@ final class DefaultLocalDirectoryMonitor: LocalDirectoryMonitor {
   }
 
   private func queueDidFire() {
+    let debounceTimeInterval = 0.2
     switch state {
     case .started(let directorySource):
-      let timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { [weak self] _ in
+      let timer = Timer.scheduledTimer(withTimeInterval: debounceTimeInterval, repeats: false) { [weak self] _ in
         self?.debounceTimerDidFire()
       }
       state = .debounce(dirSource: directorySource, timer: timer)
     case .debounce(_, let timer):
-      timer.fireDate = Date(timeIntervalSinceNow: 0.2)
+      timer.fireDate = Date(timeIntervalSinceNow: debounceTimeInterval)
       // Stay in the `.debounce` state.
     case .stopped:
       // This can happen if the read source fired and enqueued a block on the
@@ -145,6 +147,8 @@ final class DefaultLocalDirectoryMonitor: LocalDirectoryMonitor {
     guard let rawContents = try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: including, options: [.skipsHiddenFiles]) else {
       return []
     }
+    // Filter the contents to include only those that match the type identifier.
+    // TODO: This filtering should be removed when full directory sync including nested directories will be implemented.
     let filteredContents = rawContents.filter { url in
       guard let type = try? url.resourceValues(forKeys: [.typeIdentifierKey]), let urlType = type.typeIdentifier else {
         return false
