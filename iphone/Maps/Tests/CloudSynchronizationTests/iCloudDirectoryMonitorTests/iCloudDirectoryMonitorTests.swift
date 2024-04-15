@@ -5,7 +5,7 @@ typealias UbiquityIdentityToken = NSCoding & NSCopying & NSObjectProtocol
 
 class iCloudDirectoryMonitorTests: XCTestCase {
 
-  var cloudMonitor: iCloudDirectoryMonitor!
+  var cloudMonitor: iCloudDocumentsDirectoryMonitor!
   var mockFileManager: FileManagerMock!
   var mockDelegate: UbiquitousDirectoryMonitorDelegateMock!
   var cloudContainerIdentifier: String = "iCloud.app.organicmaps.debug"
@@ -14,7 +14,7 @@ class iCloudDirectoryMonitorTests: XCTestCase {
     super.setUp()
     mockFileManager = FileManagerMock()
     mockDelegate = UbiquitousDirectoryMonitorDelegateMock()
-    cloudMonitor = iCloudDirectoryMonitor(fileManager: mockFileManager, cloudContainerIdentifier: cloudContainerIdentifier, fileType: .kml)
+    cloudMonitor = iCloudDocumentsDirectoryMonitor(fileManager: mockFileManager, cloudContainerIdentifier: cloudContainerIdentifier, fileType: .kml)
     cloudMonitor.delegate = mockDelegate
   }
 

@@ -1,7 +1,7 @@
 import XCTest
 @testable import Organic_Maps__Debug_
 
-class UbiquitousDirectoryMonitorDelegateMock: UbiquitousDirectoryMonitorDelegate {
+class UbiquitousDirectoryMonitorDelegateMock: CloudDirectoryMonitorDelegate {
   var didFinishGatheringCalled = false
   var didUpdateCalled = false
   var didReceiveErrorCalled = false

@@ -30,7 +30,7 @@ private let kUDDidFinishInitialCloudSynchronization = "kUDDidFinishInitialCloudS
   private let fileType: FileType
   private let fileCoordinator = NSFileCoordinator()
   private var localDirectoryMonitor: LocalDirectoryMonitor
-  private var cloudDirectoryMonitor: UbiquitousDirectoryMonitor
+  private var cloudDirectoryMonitor: CloudDirectoryMonitor
   private let synchronizationStateManager: SynchronizationStateManager
   private let bookmarksManager = BookmarksManager.shared()
   private let backgroundQueue = DispatchQueue(label: "iCloud.app.organicmaps.backgroundQueue", qos: .background)
@@ -49,7 +49,7 @@ private let kUDDidFinishInitialCloudSynchronization = "kUDDidFinishInitialCloudS
     let fileManager = FileManager.default
     let localDirectory = fileManager.bookmarksDirectoryUrl
     let fileType = FileType.kml // only kml is supported for now
-    let cloudDirectoryMonitor = iCloudDirectoryMonitor(fileManager: fileManager, fileType: fileType)
+    let cloudDirectoryMonitor = iCloudDocumentsDirectoryMonitor(fileManager: fileManager, fileType: fileType)
     let localDirectoryMonitor = DefaultLocalDirectoryMonitor(fileManager: fileManager, directory: localDirectory, fileType: fileType)
     let synchronizationStateManager = DefaultSynchronizationStateManager(isInitialSynchronization: isInitialSynchronization)
     return CloudStorageManger(fileManager: fileManager,
@@ -62,7 +62,7 @@ private let kUDDidFinishInitialCloudSynchronization = "kUDDidFinishInitialCloudS
   // MARK: - Initialization
   private init(fileManager: FileManager,
                fileType: FileType,
-               cloudDirectoryMonitor: UbiquitousDirectoryMonitor,
+               cloudDirectoryMonitor: CloudDirectoryMonitor,
                localDirectoryMonitor: LocalDirectoryMonitor,
                synchronizationStateManager: SynchronizationStateManager) {
     self.fileManager = fileManager
@@ -77,7 +77,7 @@ private let kUDDidFinishInitialCloudSynchronization = "kUDDidFinishInitialCloudS
                         fileType: FileType,
                         cloudContainerIdentifier: String,
                         localDirectory: URL) -> CloudStorageManger {
-    let cloudDirectoryMonitor = iCloudDirectoryMonitor(fileManager: fileManager, cloudContainerIdentifier: cloudContainerIdentifier, fileType: fileType)
+    let cloudDirectoryMonitor = iCloudDocumentsDirectoryMonitor(fileManager: fileManager, cloudContainerIdentifier: cloudContainerIdentifier, fileType: fileType)
     let localDirectoryMonitor = DefaultLocalDirectoryMonitor(fileManager: fileManager, directory: localDirectory, fileType: fileType)
     let synchronizationStateManager = DefaultSynchronizationStateManager(isInitialSynchronization: CloudStorageManger.isInitialSynchronization)
     return CloudStorageManger(fileManager: fileManager,
@@ -216,7 +216,7 @@ extension CloudStorageManger: LocalDirectoryMonitorDelegate {
 }
 
 // MARK: - iCloudStorageManger + CloudDirectoryMonitorDelegate
-extension CloudStorageManger: UbiquitousDirectoryMonitorDelegate {
+extension CloudStorageManger: CloudDirectoryMonitorDelegate {
   func didFinishGathering(contents: CloudContents) {
     let events = synchronizationStateManager.resolveEvent(.didFinishGatheringCloudContents(contents))
     processEvents(events)

@@ -1,10 +1,10 @@
-protocol UbiquitousDirectoryMonitor: DirectoryMonitor {
-  var delegate: UbiquitousDirectoryMonitorDelegate? { get set }
+protocol CloudDirectoryMonitor: DirectoryMonitor {
+  var delegate: CloudDirectoryMonitorDelegate? { get set }
   func fetchUbiquityDirectoryUrl(completion: ((Result<URL, SynchronizationError>) -> Void)?)
   func isCloudAvailable() -> Bool
 }
 
-protocol UbiquitousDirectoryMonitorDelegate : AnyObject {
+protocol CloudDirectoryMonitorDelegate : AnyObject {
   func didFinishGathering(contents: CloudContents)
   func didUpdate(contents: CloudContents)
   func didReceiveCloudMonitorError(_ error: Error)
@@ -13,7 +13,7 @@ protocol UbiquitousDirectoryMonitorDelegate : AnyObject {
 private let kUDCloudIdentityKey = "com.apple.organicmaps.UbiquityIdentityToken"
 private let kDocumentsDirectoryName = "Documents"
 
-final class iCloudDirectoryMonitor: NSObject, UbiquitousDirectoryMonitor {
+final class iCloudDocumentsDirectoryMonitor: NSObject, CloudDirectoryMonitor {
 
   private static let sharedContainerIdentifier: String = {
     var identifier = "iCloud.app.organicmaps"
@@ -32,9 +32,9 @@ final class iCloudDirectoryMonitor: NSObject, UbiquitousDirectoryMonitor {
   // MARK: - Public properties
   var isStarted: Bool { return metadataQuery?.isStarted ?? false }
   private(set) var isPaused: Bool = true
-  weak var delegate: UbiquitousDirectoryMonitorDelegate?
+  weak var delegate: CloudDirectoryMonitorDelegate?
 
-  init(fileManager: FileManager = .default, cloudContainerIdentifier: String = iCloudDirectoryMonitor.sharedContainerIdentifier, fileType: FileType) {
+  init(fileManager: FileManager = .default, cloudContainerIdentifier: String = iCloudDocumentsDirectoryMonitor.sharedContainerIdentifier, fileType: FileType) {
     self.fileManager = fileManager
     self.containerIdentifier = cloudContainerIdentifier
     self.fileType = fileType
@@ -114,7 +114,7 @@ final class iCloudDirectoryMonitor: NSObject, UbiquitousDirectoryMonitor {
 }
 
 // MARK: - Private
-private extension iCloudDirectoryMonitor {
+private extension iCloudDocumentsDirectoryMonitor {
 
   func subscribeOnCloudAvailabilityNotifications() {
     NotificationCenter.default.addObserver(self, selector: #selector(cloudAvailabilityChanged(_:)), name: .NSUbiquityIdentityDidChange, object: nil)
