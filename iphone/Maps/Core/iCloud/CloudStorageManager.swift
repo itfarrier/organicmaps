@@ -19,7 +19,25 @@ private let kBookmarksDirectoryName = "bookmarks"
 private let kICloudSynchronizationDidChangeEnabledStateNotificationName = "iCloudSynchronizationDidChangeEnabledStateNotification"
 private let kUDDidFinishInitialCloudSynchronization = "kUDDidFinishInitialCloudSynchronization"
 
+@objc @objcMembers final class SynchronizationProgress: NSObject {
+  var isInProgress: Bool
+  var error: SynchronizationError?
+
+  init(isInProgress: Bool, error: SynchronizationError?) {
+    self.isInProgress = isInProgress
+    self.error = error
+  }
+
+  static let notInProgress = SynchronizationProgress(isInProgress: false, error: nil)
+  static let inProgress = SynchronizationProgress(isInProgress: true, error: nil)
+}
+
 @objc @objcMembers final class CloudStorageManger: NSObject {
+
+  fileprivate struct Observation {
+    weak var observer: AnyObject?
+    var onSynchronizationProgressChanged: ((SynchronizationProgress) -> Void)?
+  }
 
   private let fileManager: FileManager
   private let fileType: FileType
@@ -29,11 +47,12 @@ private let kUDDidFinishInitialCloudSynchronization = "kUDDidFinishInitialCloudS
   private let synchronizationStateManager: SynchronizationStateManager
   private let bookmarksManager = BookmarksManager.shared()
   private let backgroundQueue = DispatchQueue(label: "iCloud.app.organicmaps.backgroundQueue", qos: .background)
-  private var isSynchronizationInProcess = false
   private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
   private var localDirectoryUrl: URL { localDirectoryMonitor.directory }
   private var needsToReloadBookmarksOnTheMap = false
   private var semaphore: DispatchSemaphore?
+  private var observers = [ObjectIdentifier: CloudStorageManger.Observation]()
+  private var synchronizationProgress: SynchronizationProgress = .notInProgress
 
   static private var isInitialSynchronization: Bool {
     return !UserDefaults.standard.bool(forKey: kUDDidFinishInitialCloudSynchronization)
@@ -156,6 +175,7 @@ private extension CloudStorageManger {
     LOG(.debug, "Stop synchronization")
     localDirectoryMonitor.stop()
     cloudDirectoryMonitor.stop()
+    synchronizationProgress = .notInProgress
     synchronizationStateManager.resetState()
     removeFromBookmarksManagerObserverList()
   }
@@ -170,6 +190,11 @@ private extension CloudStorageManger {
     addToBookmarksManagerObserverList()
     localDirectoryMonitor.resume()
     cloudDirectoryMonitor.resume()
+  }
+
+  func updateProgress(_ progress: SynchronizationProgress) {
+    synchronizationProgress = progress
+    notifyObserversOnSynchronizationProgressChanged(progress)
   }
 
   // MARK: - BookmarksManager observing
@@ -223,6 +248,8 @@ extension CloudStorageManger: UbiquitousDirectoryMonitorDelegate {
 private extension CloudStorageManger {
   // MARK: - Handle Events
   func processEvents(_ events: [OutgoingEvent]) {
+    updateProgress(.inProgress)
+
     events.forEach { [weak self] event in
       guard let self else { return }
 
@@ -232,10 +259,10 @@ private extension CloudStorageManger {
       }
     }
 
-    backgroundQueue.async {
-      self.reloadBookmarksOnTheMapIfNeeded()
-      self.isSynchronizationInProcess = false
-      self.cancelBackgroundExecution()
+    backgroundQueue.async { [self] in
+      reloadBookmarksOnTheMapIfNeeded()
+      updateProgress(getProgressFromEvents(events))
+      cancelBackgroundExecution()
     }
   }
 
@@ -253,6 +280,20 @@ private extension CloudStorageManger {
     case .didFinishInitialSynchronization: UserDefaults.standard.set(true, forKey: kUDDidFinishInitialCloudSynchronization)
     case .didReceiveError(let error): processError(error)
     }
+  }
+
+  func getProgressFromEvents(_ events: [OutgoingEvent]) -> SynchronizationProgress {
+    let isInProgress = !events.isEmpty
+    let error: SynchronizationError? = events.compactMap { event in
+      switch event {
+      case .didReceiveError(let error):
+        return error
+      default:
+        return nil
+      }
+    }.first
+
+    return SynchronizationProgress(isInProgress: isInProgress, error: error)
   }
 
   func completionHandler(result: VoidResult) {
@@ -394,26 +435,19 @@ private extension CloudStorageManger {
 
   // MARK: - Error handling
   func processError(_ error: Error) {
-    DispatchQueue.main.async {
+    if let synchronizationError = error as? SynchronizationError {
       LOG(.error, "Synchronization error: \(error)")
-      if let synchronizationError = error as? SynchronizationError {
-        switch synchronizationError {
-        case .fileUnavailable:
-          // TODO: Handle file unavailable error
-          break
-        case .fileNotUploadedDueToQuota, .iCloudIsNotAvailable, .containerNotFound:
-          // TODO: should we try to restart sync earlier? Or use some timeout?
-          //          self.stopSynchronization()
-          break
-        case .ubiquityServerNotAvailable:
-          break
-        case .internal(let error):
-          // TODO: Handle internal error
-          break
-        }
-      } else {
-        // TODO: Handle regular errors
+      switch synchronizationError {
+      case .fileUnavailable, .fileNotUploadedDueToQuota, .ubiquityServerNotAvailable:
+        // Synchronization process should not be stopped in these cases.
+        break
+      case .iCloudIsNotAvailable, .containerNotFound:
+        stopSynchronization()
       }
+      updateProgress(SynchronizationProgress(isInProgress: synchronizationProgress.isInProgress, error: synchronizationError))
+    } else {
+      // TODO: Handle non-synchronization errors
+      LOG(.error, "Non-synchronization error: \(error)")
     }
   }
 
@@ -515,6 +549,30 @@ private extension CloudStorageManger {
   }
 }
 
+// MARK: - CloudStorageManger Observing
+extension CloudStorageManger {
+  func addObserver(_ observer: AnyObject, onSynchronizationProgressChangedHandler: @escaping (SynchronizationProgress) -> Void) {
+    let id = ObjectIdentifier(observer)
+    observers[id] = Observation(observer: observer, onSynchronizationProgressChanged: onSynchronizationProgressChangedHandler)
+    // Notify a new observer immediately to handle initial state.
+    observers[id]?.onSynchronizationProgressChanged?(synchronizationProgress)
+  }
+
+
+  func removeObserver(_ observer: AnyObject) {
+    let id = ObjectIdentifier(observer)
+    observers.removeValue(forKey: id)
+  }
+
+  private func notifyObserversOnSynchronizationProgressChanged(_ progress: SynchronizationProgress) {
+    self.observers.removeUnreachable().forEach { _, observable in
+      DispatchQueue.main.async {
+        observable.onSynchronizationProgressChanged?(progress)
+      }
+    }
+  }
+}
+
 // MARK: - BookmarksObserver
 extension CloudStorageManger: BookmarksObserver {
   func onBookmarksLoadFinished() {
@@ -526,7 +584,7 @@ extension CloudStorageManger: BookmarksObserver {
 private extension CloudStorageManger {
   // Extends background execution time to finish uploading.
   func extendBackgroundExecutionIfNeeded(expirationHandler: (() -> Void)? = nil) {
-    guard isSynchronizationInProcess else {
+    guard synchronizationProgress.isInProgress else {
       expirationHandler?()
       return
     }
@@ -585,5 +643,16 @@ private extension Data {
     if let lastModificationDate {
       try url.setResourceModificationDate(Date(timeIntervalSince1970: lastModificationDate))
     }
+  }
+}
+
+private extension Dictionary where Key == ObjectIdentifier, Value == CloudStorageManger.Observation {
+  mutating func removeUnreachable() -> Self {
+    for (id, observation) in self {
+      if observation.observer == nil {
+        removeValue(forKey: id)
+      }
+    }
+    return self
   }
 }

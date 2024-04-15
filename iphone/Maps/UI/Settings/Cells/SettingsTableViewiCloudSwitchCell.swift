@@ -5,11 +5,22 @@ final class SettingsTableViewiCloudSwitchCell: SettingsTableViewSwitchCell {
     styleDetail()
   }
 
+  override func config(delegate: SettingsTableViewSwitchCellDelegate, title: String, isOn: Bool) {
+    super.config(delegate: delegate, title: title, isOn: isOn)
+    setSynchronizationEnabled(isOn)
+  }
+
   @objc
-  func updateStateWithError(_ error: Error?) {
-    if let error = error as? SynchronizationError {
+  func setSynchronizationEnabled(_ isEnabled: Bool) {
+    detailTextLabel?.text = isEnabled ? "Enabling..." : "Disabled"
+  }
+
+  @objc
+  func setSynchronizationProgress(_ progress: SynchronizationProgress) {
+    if let error = progress.error {
       switch error {
       case .fileUnavailable, .fileNotUploadedDueToQuota, .ubiquityServerNotAvailable:
+        guard isOn else { return }
         accessoryView = switchButton
       case .iCloudIsNotAvailable, .containerNotFound:
         accessoryView = nil
@@ -17,8 +28,9 @@ final class SettingsTableViewiCloudSwitchCell: SettingsTableViewSwitchCell {
       }
       detailTextLabel?.text = error.localizedDescription
     } else {
-      detailTextLabel?.text = nil
+      guard isOn else { return }
       accessoryView = switchButton
+      detailTextLabel?.text = progress.isInProgress ? "Synchronizing…" : "All is up to date"
     }
   }
 

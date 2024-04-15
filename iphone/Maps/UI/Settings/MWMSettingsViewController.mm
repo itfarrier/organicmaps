@@ -185,10 +185,14 @@ static NSString * const kUDDidShowICloudSynchronizationEnablingAlert = @"kUDDidS
   }
   [self.nightModeCell configWithTitle:L(@"pref_appearance_title") info:nightMode];
 
-  // TODO: add localized string
+  BOOL isICLoudSynchronizationEnabled = [MWMSettings iCLoudSynchronizationEnabled];
   [self.iCloudSynchronizationCell configWithDelegate:self
                                                title:@"iCloud Synchronization (Beta)"
-                                                isOn:[MWMSettings iCLoudSynchronizationEnabled]];
+                                                isOn:isICLoudSynchronizationEnabled];
+  // Subscribe on the iCloud synchronization progress updates.
+  [CloudStorageManger.shared addObserver:self onSynchronizationProgressChangedHandler:^(SynchronizationProgress * _Nonnull progress) {
+    [self.iCloudSynchronizationCell setSynchronizationProgress:progress];
+  }];
 }
 
 - (void)show3dBuildingsAlert:(UITapGestureRecognizer *)recognizer {
@@ -270,6 +274,17 @@ static NSString * const kUDDidShowICloudSynchronizationEnablingAlert = @"kUDDidS
   [NSUserDefaults.standardUserDefaults setBool:YES forKey:kUDDidShowICloudSynchronizationEnablingAlert];
 }
 
+- (void)showICloudIsDisabledAlert {
+  UIAlertController * alertController = [UIAlertController alertControllerWithTitle:@"iCloud is Disabled"
+                                                                            message:@"Please enable iCloud in your device's settings to use this feature."
+                                                                     preferredStyle:UIAlertControllerStyleAlert];
+  UIAlertAction * okButton = [UIAlertAction actionWithTitle:L(@"ok")
+                                                      style:UIAlertActionStyleCancel
+                                                    handler:nil];
+  [alertController addAction:okButton];
+  [self presentViewController:alertController animated:YES completion:nil];
+}
+
 #pragma mark - SettingsTableViewSwitchCellDelegate
 
 - (void)switchCell:(SettingsTableViewSwitchCell *)cell didChangeValue:(BOOL)value {
@@ -308,6 +323,7 @@ static NSString * const kUDDidShowICloudSynchronizationEnablingAlert = @"kUDDidS
         [MWMSettings setICLoudSynchronizationEnabled:isEnabled];
       }];
     } else {
+      [self.iCloudSynchronizationCell setSynchronizationEnabled:value];
       [MWMSettings setICLoudSynchronizationEnabled:value];
     }
   }
@@ -316,6 +332,7 @@ static NSString * const kUDDidShowICloudSynchronizationEnablingAlert = @"kUDDidS
 #pragma mark - UITableViewDelegate
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+  [tableView deselectRowAtIndexPath:indexPath animated:true];
   auto cell = [tableView cellForRowAtIndexPath:indexPath];
   if (cell == self.profileCell) {
     [self performSegueWithIdentifier:@"SettingsToProfileSegue" sender:nil];
@@ -333,6 +350,13 @@ static NSString * const kUDDidShowICloudSynchronizationEnablingAlert = @"kUDDidS
     [self performSegueWithIdentifier:@"SettingsToTTSSegue" sender:nil];
   } else if (cell == self.drivingOptionsCell) {
     [self performSegueWithIdentifier:@"settingsToDrivingOptionsSegue" sender:nil];
+  }
+}
+
+- (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath {
+  auto cell = [tableView cellForRowAtIndexPath:indexPath];
+  if (cell == self.iCloudSynchronizationCell) {
+    [self showICloudIsDisabledAlert];
   }
 }
 
