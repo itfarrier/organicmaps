@@ -463,6 +463,7 @@
 		CDCA278E2248F34C00167D87 /* MWMRoutingManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = CDCA278B2248F34C00167D87 /* MWMRoutingManager.mm */; };
 		ED0B1C312BC2951F00FB8EDD /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = ED0B1C302BC2951F00FB8EDD /* PrivacyInfo.xcprivacy */; };
 		ED0F4AA92BCD536100D5F7A8 /* SettingsTableViewiCloudSwitchCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED0F4AA82BCD536000D5F7A8 /* SettingsTableViewiCloudSwitchCell.swift */; };
+		ED0F4AAD2BCD9A6500D5F7A8 /* SynchronizationError.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED0F4AAC2BCD9A6500D5F7A8 /* SynchronizationError.swift */; };
 		ED1080A72B791CFE0023F27E /* SocialMediaCollectionViewHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED1080A62B791CFE0023F27E /* SocialMediaCollectionViewHeader.swift */; };
 		ED1263AB2B6F99F900AD99F3 /* UIView+AddSeparator.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED1263AA2B6F99F900AD99F3 /* UIView+AddSeparator.swift */; };
 		ED1ADA332BC6B1B40029209F /* CarPlayServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED1ADA322BC6B1B40029209F /* CarPlayServiceTests.swift */; };
@@ -1361,6 +1362,7 @@
 		ED097E762BB80C320006ED01 /* OMapsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OMapsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED0B1C302BC2951F00FB8EDD /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		ED0F4AA82BCD536000D5F7A8 /* SettingsTableViewiCloudSwitchCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsTableViewiCloudSwitchCell.swift; sourceTree = "<group>"; };
+		ED0F4AAC2BCD9A6500D5F7A8 /* SynchronizationError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SynchronizationError.swift; sourceTree = "<group>"; };
 		ED1080A62B791CFE0023F27E /* SocialMediaCollectionViewHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialMediaCollectionViewHeader.swift; sourceTree = "<group>"; };
 		ED1263AA2B6F99F900AD99F3 /* UIView+AddSeparator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+AddSeparator.swift"; sourceTree = "<group>"; };
 		ED1ADA322BC6B1B40029209F /* CarPlayServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarPlayServiceTests.swift; sourceTree = "<group>"; };
@@ -3006,6 +3008,7 @@
 				ED4836B12BC9BD46004FA089 /* SynchronizationStateManager.swift */,
 				ED4836A02BC9BBD5004FA089 /* CloudStorageManager.swift */,
 				ED4836A12BC9BBD5004FA089 /* MetadataItem.swift */,
+				ED0F4AAC2BCD9A6500D5F7A8 /* SynchronizationError.swift */,
 			);
 			path = iCloud;
 			sourceTree = "<group>";
@@ -4513,6 +4516,7 @@
 				3454D7DA1E07F045004AF2AD /* UILabel+RuntimeAttributes.m in Sources */,
 				34AB66531FC5AA330078E451 /* MWMiPadRoutePreview.m in Sources */,
 				3454D7E31E07F045004AF2AD /* UITextView+RuntimeAttributes.m in Sources */,
+				ED0F4AAD2BCD9A6500D5F7A8 /* SynchronizationError.swift in Sources */,
 				F6A2184A1CA3F26800BE2CC6 /* MWMEditorViralActivityItem.mm in Sources */,
 				993DF10923F6BDB100AC231A /* IFonts.swift in Sources */,
 				47699A0821F08E37009E6585 /* NSDate+TimeDistance.m in Sources */,
