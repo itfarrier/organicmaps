@@ -4,9 +4,9 @@ protocol SettingsTableViewSwitchCellDelegate {
 }
 
 @objc
-final class SettingsTableViewSwitchCell: MWMTableViewCell {
+class SettingsTableViewSwitchCell: MWMTableViewCell {
 
-  private let switchButton = UISwitch()
+  let switchButton = UISwitch()
 
   @IBOutlet weak var delegate: SettingsTableViewSwitchCellDelegate?
 
