@@ -281,6 +281,8 @@ highway-footway-tunnel                              # line z15- (also has line::
 highway-path                                        # line z14- (also has pathtext z15-)
 highway-path-bicycle                                # line z14- (also has pathtext z15-)
 highway-path-bridge                                 # line z14- (also has line::bridgeblack z17-, line::bridgewhite z15-, pathtext z15-)
+highway-path-difficult
+highway-path-expert
 highway-path-horse                                  # line z14- (also has pathtext z15-)
 highway-path-tunnel                                 # line z14- (also has line::tunnelBackground z17-, line::tunnelCasing z17-, pathtext z15-)
 highway-raceway                                     # line z14- (also has pathtext z16-)

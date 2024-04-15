@@ -537,8 +537,9 @@ natural|water|moat;[natural=water][water=moat];;name;int_name;449;
 natural|water|wastewater;[natural=water][water=wastewater];;name;int_name;450;
 deprecated:railway|razed:06.2023;451;x
 highway|footway|demanding_mountain_hiking;[highway=footway][sac_scale=demanding_mountain_hiking];;name;int_name;452;
-deprecated|deprecated;453;x
-deprecated|deprecated;454;x
+# _path_grade is a surrogate tag which combines sac_scale and trail_visibility, see osm2type.cpp
+highway|path|difficult;[highway=path][_path_grade=difficult];;name;int_name;453;
+highway|path|expert;[highway=path][_path_grade=expert];;name;int_name;454;
 landuse|orchard;455;
 amenity|shelter|public_transport;[amenity=shelter][shelter_type=public_transport];;name;int_name;456;
 highway|living_street|tunnel;[highway=living_street][tunnel?];;name;int_name;457;

@@ -680,6 +680,36 @@ string DetermineSurface(OsmElement * p)
   return psurface;
 }
 
+string DeterminePathGrade(OsmElement * p)
+{
+  if (!p->HasTag("highway", "path"))
+    return {};
+
+  string scale = p->GetTag("sac_scale");
+  string visibility = p->GetTag("trail_visibility");
+  
+  if (scale.empty() && visibility.empty())
+    return {};
+
+  static base::StringIL expertScales = {
+      "alpine_hiking", "demanding_alpine_hiking", "difficult_alpine_hiking"
+  };
+  static base::StringIL difficultVisibilities = {
+      "intermediate", "bad", "poor" // poor is not official
+  };
+  static base::StringIL expertVisibilities = {
+      "horrible", "no", "very_bad" // very_bad is not official
+  };
+
+  if (base::IsExist(expertScales, scale) || base::IsExist(expertVisibilities, visibility))
+    return "expert";
+  else if (scale == "demanding_mountain_hiking" || base::IsExist(difficultVisibilities, visibility))
+    return "difficult"; // WIP : maybe include T2 here?
+
+  // "hiking" & "mountain_hiking" scales, "excellent" & "good" & unknown visibilities is "no grade"
+  return {};
+}
+
 void PreprocessElement(OsmElement * p, CalculateOriginFnT const & calcOrg)
 {
   bool hasLayer = false;
@@ -761,6 +791,8 @@ void PreprocessElement(OsmElement * p, CalculateOriginFnT const & calcOrg)
   }
 
   p->AddTag("psurface", DetermineSurface(p));
+
+  p->AddTag("_path_grade", DeterminePathGrade(p));
 
   string const kCuisineKey = "cuisine";
   auto cuisines = p->GetTag(kCuisineKey);
