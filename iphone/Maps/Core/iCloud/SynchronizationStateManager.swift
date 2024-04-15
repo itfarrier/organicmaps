@@ -21,13 +21,12 @@ enum IncomingEvent {
   case didUpdateCloudContents(CloudContents)
 }
 
-enum SynchronizationError: Error {
+@objc enum SynchronizationError: Int, Error {
   case fileUnavailable
   case fileNotUploadedDueToQuota
   case ubiquityServerNotAvailable
   case iCloudIsNotAvailable
   case containerNotFound
-  case `internal`(Error)
 }
 
 enum OutgoingEvent {
@@ -196,14 +195,13 @@ final class DefaultSynchronizationStateManager: SynchronizationStateManager {
     }
   }
 
-
   private static func getItemsWithErrors(_ cloudContents: CloudContents) -> [SynchronizationError] {
      cloudContents.reduce(into: [SynchronizationError](), { partialResult, cloudItem in
-      if let downloadingError = cloudItem.downloadingError {
-        partialResult.append(SynchronizationError.fromError(downloadingError))
+      if let downloadingError = cloudItem.downloadingError, let synchronizationError = SynchronizationError.fromError(downloadingError) {
+        partialResult.append(synchronizationError)
       }
-      if let uploadingError = cloudItem.uploadingError {
-        partialResult.append(SynchronizationError.fromError(uploadingError))
+      if let uploadingError = cloudItem.uploadingError, let synchronizationError = SynchronizationError.fromError(uploadingError) {
+        partialResult.append(synchronizationError)
       }
     })
   }
@@ -244,7 +242,7 @@ final class DefaultSynchronizationStateManager: SynchronizationStateManager {
 }
 
 private extension SynchronizationError {
-  static func fromError(_ error: Error) -> SynchronizationError {
+  static func fromError(_ error: Error) -> SynchronizationError? {
     let nsError = error as NSError
     switch nsError.code {
       // NSURLUbiquitousItemDownloadingErrorKey contains an error with this code when the item has not been uploaded to iCloud by the other devices yet
@@ -257,7 +255,21 @@ private extension SynchronizationError {
     case NSUbiquitousFileUbiquityServerNotAvailable:
       return .ubiquityServerNotAvailable
     default:
-      return .internal(error)
+      return nil
+    }
+  }
+}
+
+// MARK: - SynchronizationError + Localized Description
+extension SynchronizationError: LocalizedError {
+  var errorDescription: String? {
+    switch self {
+    case .fileUnavailable, .ubiquityServerNotAvailable:
+      return L("icloud_synchronization_error_connection_error")
+    case .fileNotUploadedDueToQuota:
+      return L("icloud_synchronization_error_quota_exceeded")
+    case .iCloudIsNotAvailable, .containerNotFound:
+      return L("icloud_synchronization_error_cloud_is_unavailable")
     }
   }
 }
