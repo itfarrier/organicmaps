@@ -22467,6 +22467,170 @@ cont {
   }
 }
 cont {
+  name: "highway-footway-bicycle"
+  element {
+    scale: 14
+    lines {
+      width: 1.2
+      color: 1299070279
+      priority: 160
+      cap: BUTTCAP
+    }
+  }
+  element {
+    scale: 15
+    lines {
+      width: 1.4
+      color: 1299070279
+      priority: 160
+      cap: BUTTCAP
+    }
+    lines {
+      width: 1.5
+      color: 1078675011
+      dashdot {
+        dd: 5.0
+        dd: 2.0
+      }
+      priority: 180
+      cap: BUTTCAP
+    }
+    path_text {
+      primary {
+        height: 8
+        color: 7829367
+        stroke_color: 856032768
+      }
+      priority: 2950
+    }
+  }
+  element {
+    scale: 16
+    lines {
+      width: 1.6
+      color: 1299070279
+      priority: 160
+    }
+    lines {
+      width: 2.0
+      color: 1078675011
+      dashdot {
+        dd: 5.0
+        dd: 2.0
+      }
+      priority: 180
+    }
+    path_text {
+      primary {
+        height: 9
+        color: 7829367
+        stroke_color: 856032768
+      }
+      priority: 2950
+    }
+  }
+  element {
+    scale: 17
+    lines {
+      width: 1.8
+      color: 1299070279
+      priority: 160
+    }
+    lines {
+      width: 2.4
+      color: 1078675011
+      dashdot {
+        dd: 6.0
+        dd: 2.5
+      }
+      priority: 180
+    }
+    path_text {
+      primary {
+        height: 9
+        color: 7829367
+        stroke_color: 856032768
+      }
+      priority: 2950
+    }
+  }
+  element {
+    scale: 18
+    lines {
+      width: 2.0
+      color: 443432263
+      priority: 160
+    }
+    lines {
+      width: 3.2
+      color: 4933187
+      dashdot {
+        dd: 8.0
+        dd: 3.0
+      }
+      priority: 180
+    }
+    path_text {
+      primary {
+        height: 10
+        color: 7829367
+        stroke_color: 856032768
+      }
+      priority: 2950
+    }
+  }
+  element {
+    scale: 19
+    lines {
+      width: 2.2
+      color: 443432263
+      priority: 160
+    }
+    lines {
+      width: 4.2
+      color: 4933187
+      dashdot {
+        dd: 10.0
+        dd: 3.5
+      }
+      priority: 180
+    }
+    path_text {
+      primary {
+        height: 10
+        color: 7829367
+        stroke_color: 856032768
+      }
+      priority: 2950
+    }
+  }
+  element {
+    scale: 20
+    lines {
+      width: 2.2
+      color: 443432263
+      priority: 160
+    }
+    lines {
+      width: 4.2
+      color: 4933187
+      dashdot {
+        dd: 10.0
+        dd: 3.5
+      }
+      priority: 180
+    }
+    path_text {
+      primary {
+        height: 10
+        color: 7829367
+        stroke_color: 856032768
+      }
+      priority: 2950
+    }
+  }
+}
+cont {
   name: "highway-footway-bridge"
   element {
     scale: 15
@@ -25956,6 +26120,12 @@ cont {
   element {
     scale: 14
     lines {
+      width: 1.2
+      color: 1299070279
+      priority: 160
+      cap: BUTTCAP
+    }
+    lines {
       width: 0.9
       color: 1720994322
       dashdot {
@@ -25968,6 +26138,12 @@ cont {
   }
   element {
     scale: 15
+    lines {
+      width: 1.4
+      color: 1299070279
+      priority: 160
+      cap: BUTTCAP
+    }
     lines {
       width: 1.1
       color: 1720994322
@@ -25990,6 +26166,11 @@ cont {
   element {
     scale: 16
     lines {
+      width: 1.6
+      color: 1299070279
+      priority: 160
+    }
+    lines {
       width: 1.5
       color: 1720994322
       dashdot {
@@ -26009,6 +26190,11 @@ cont {
   }
   element {
     scale: 17
+    lines {
+      width: 1.8
+      color: 1299070279
+      priority: 160
+    }
     lines {
       width: 2.0
       color: 1720994322
@@ -26030,6 +26216,11 @@ cont {
   element {
     scale: 18
     lines {
+      width: 2.0
+      color: 443432263
+      priority: 160
+    }
+    lines {
       width: 2.8
       color: 865356306
       dashdot {
@@ -26050,6 +26241,11 @@ cont {
   element {
     scale: 19
     lines {
+      width: 2.2
+      color: 443432263
+      priority: 160
+    }
+    lines {
       width: 3.7
       color: 865356306
       dashdot {
@@ -26069,6 +26265,11 @@ cont {
   }
   element {
     scale: 20
+    lines {
+      width: 2.2
+      color: 443432263
+      priority: 160
+    }
     lines {
       width: 3.7
       color: 865356306
