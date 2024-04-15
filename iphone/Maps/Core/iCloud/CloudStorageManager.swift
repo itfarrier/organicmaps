@@ -271,6 +271,7 @@ private extension CloudStorageManger {
 
   func getProgressFromEvents(_ events: [OutgoingEvent]) -> SynchronizationProgress {
     let isInProgress = !events.isEmpty
+    // TODO: Only the first error is use because we we don;t process all error for now. This should be fixed later to handle error for every file.
     let error: SynchronizationError? = events.compactMap { event in
       switch event {
       case .didReceiveError(let error):
@@ -297,6 +298,7 @@ private extension CloudStorageManger {
       needsToReloadBookmarksOnTheMap = false
       semaphore = DispatchSemaphore(value: 0)
       DispatchQueue.main.async {
+        // TODO: implement method in the c++ bookmarks manager to reload only updated category
         self.bookmarksManager.loadBookmarks()
       }
       semaphore?.wait()
