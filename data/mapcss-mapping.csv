@@ -187,7 +187,7 @@ amenity|recycling|container;[amenity=recycling][recycling_type=container];;name;
 leisure|garden;110;
 landuse|commercial;111;
 railway|station;112;
-highway|path|hiking;[highway=path][route=hiking],[highway=path][sac_scale=hiking];;name;int_name;113;
+deprecated:highway|path|hiking:04.2024;[highway=path][route=hiking],[highway=path][sac_scale=hiking];x;name;int_name;113;highway|path
 amenity|hospital;114;
 # TODO: merge with "intermittent".
 waterway|stream|ephemeral;[waterway=stream][intermittent=ephemeral];;name;int_name;115;
@@ -243,7 +243,7 @@ shop|bakery;162;
 highway|construction;163;
 highway|cycleway|bridge;[highway=cycleway][bridge?];;name;int_name;164;
 leisure|sports_centre;165;
-highway|path|mountain_hiking;[highway=path][sac_scale=mountain_hiking];;name;int_name;166;
+deprecated:highway|path|mountain_hiking:04.2024;[highway=path][sac_scale=mountain_hiking];x;name;int_name;166;highway|path
 tourism|camp_site;167;
 highway|bridleway;168;
 natural|heath;169;
@@ -379,7 +379,7 @@ highway|secondary|tunnel;[highway=secondary][tunnel?];;name;int_name;297;
 # TODO: its a mismapping likely, if there is a bridge structure still, then it should be railway=disused.
 railway|abandoned|bridge;[railway=abandoned][bridge?];;name;int_name;298;
 man_made|lighthouse;299;
-highway|path|demanding_mountain_hiking;[highway=path][sac_scale=demanding_mountain_hiking];;name;int_name;300;
+deprecated:highway|path|demanding_mountain_hiking:04.2024;[highway=path][sac_scale=demanding_mountain_hiking];x;name;int_name;300;highway|path
 man_made|storage_tank;301;
 man_made|silo;302;
 power|generator;303;
@@ -432,7 +432,7 @@ railway|tram|bridge;[railway=tram][bridge?];;name;int_name;346;
 piste:type|downhill|advanced;[piste:type=downhill][piste:difficulty=advanced];;name;int_name;347;
 sport|shooting;348;
 place|country;349;
-highway|path|alpine_hiking;[highway=path][sac_scale=alpine_hiking];;name;int_name;350;
+deprecated:highway|path|alpine_hiking:04.2024;[highway=path][sac_scale=alpine_hiking];x;name;int_name;350;highway|path
 tourism|zoo|petting;[tourism=zoo][zoo=petting_zoo];;name;int_name;351;
 sport|scuba_diving;352;
 deprecated:highway|cycleway|permissive:12.2023;[highway=cycleway][access=permissive];x;name;int_name;353;highway|cycleway
@@ -478,7 +478,7 @@ sport|american_football;391;
 landuse|education;392;
 man_made|cairn;393;
 railway|preserved|bridge;[railway=preserved][bridge?];;name;int_name;394;
-highway|path|demanding_alpine_hiking;[highway=path][sac_scale=demanding_alpine_hiking];;name;int_name;395;
+deprecated:highway|path|demanding_alpine_hiking:04.2024;[highway=path][sac_scale=demanding_alpine_hiking];x;name;int_name;395;highway|path
 railway|rail|spur|tunnel;[railway=rail][service=spur][!usage][tunnel?];;name;int_name;396;
 highway|secondary_link|bridge;[highway=secondary_link][bridge?];;name;int_name;397;
 railway|tram|tunnel;[railway=tram][tunnel?];;name;int_name;398;
@@ -528,7 +528,7 @@ natural|shingle;440;
 aerialway|t-bar;441;
 amenity|parking|lane|fee;[amenity=parking][parking=lane][fee];;name;int_name;442;
 amenity|parking|street_side|fee;[amenity=parking][parking=street_side][fee];;name;int_name;443;
-highway|path|difficult_alpine_hiking;[highway=path][sac_scale=difficult_alpine_hiking];;name;int_name;444;
+deprecated:highway|path|difficult_alpine_hiking:04.2024;[highway=path][sac_scale=difficult_alpine_hiking];x;name;int_name;444;highway|path
 earthquake:damage|spontaneous_camp;445;
 natural|water|drain;[natural=water][water=drain];;name;int_name;446;
 deprecated:railway|yard:06.2023;447;x
