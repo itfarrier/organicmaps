@@ -97,6 +97,8 @@ line|z11-[highway=bridleway],
 {color: @path; opacity: 1;}
 
 line|z11-[highway=cycleway],
+line|z12-[highway=footway][bicycle=yes]::cycleline,
+line|z12-[highway=path][bicycle=yes]::cycleline,
 {color: @cycleway; opacity: 1;}
 
 line|z11[highway=track],
@@ -179,18 +181,32 @@ line|z18-[highway=bridleway],
 line|z11[highway=cycleway],
 {width: 0.7; opacity: 0.6;}
 line|z12[highway=cycleway],
+line|z12-[highway=footway][bicycle=yes]::cycleline,
+line|z12-[highway=path][bicycle=yes]::cycleline,
 {width: 0.8; opacity: 0.7;}
 line|z13[highway=cycleway],
+line|z13-[highway=footway][bicycle=yes]::cycleline,
+line|z13-[highway=path][bicycle=yes]::cycleline,
 {width: 1.1;}
 line|z14[highway=cycleway],
+line|z14-[highway=footway][bicycle=yes]::cycleline,
+line|z14-[highway=path][bicycle=yes]::cycleline,
 {width: 1.4;}
 line|z15[highway=cycleway],
+line|z15-[highway=footway][bicycle=yes]::cycleline,
+line|z15-[highway=path][bicycle=yes]::cycleline,
 {width: 1.6;}
 line|z16[highway=cycleway],
+line|z16-[highway=footway][bicycle=yes]::cycleline,
+line|z16-[highway=path][bicycle=yes]::cycleline,
 {width: 1.9;}
 line|z17[highway=cycleway],
+line|z17-[highway=footway][bicycle=yes]::cycleline,
+line|z17-[highway=path][bicycle=yes]::cycleline,
 {width: 2.3;}
 line|z18-[highway=cycleway],
+line|z18-[highway=footway][bicycle=yes]::cycleline,
+line|z18-[highway=path][bicycle=yes]::cycleline,
 {width: 2.8;}
 
 
