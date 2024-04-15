@@ -22,7 +22,7 @@
 @unclassified: #FCFCFC;
 @pedestrian: #FCFCFC;
 @footway: #FCFCFC;
-@cycleway: #FF87AD;
+@cycleway: #534DEB;
 @construction: #BBBBAA;
 @track: #635730;
 @path: #A05012;
